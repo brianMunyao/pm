@@ -1,7 +1,7 @@
 import MainApp from './MainApp';
 
 function App() {
-	return <MainApp />;
+    return <MainApp / > ;
 }
 
 export default App;
