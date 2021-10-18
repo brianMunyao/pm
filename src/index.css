@@ -10,3 +10,19 @@ a {
     text-decoration: none;
     color: inherit;
 }
+
+input,
+textarea {
+    border: none;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+}
+
+.fja {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

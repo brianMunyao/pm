@@ -1,13 +1,7 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 
 const PageNotFound = () => {
-	return (
-		<div>
-			Not Found
-			<p>{useLocation().pathname}</p>
-		</div>
-	);
+	return <div>Not Found</div>;
 };
 
 export default PageNotFound;
