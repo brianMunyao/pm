@@ -28,3 +28,7 @@ export const projectTypes = [
     'Blockchain',
     'Finance',
 ];
+
+export const getByID = (id = 0, list = []) => {
+    return list.filter((l) => l.id === id)[0] || null;
+};

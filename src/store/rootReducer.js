@@ -5,6 +5,10 @@ const rootReducer = (state = {}, action) => {
             return {...state, navMini: true };
         case actions.NAV_MAX:
             return {...state, navMini: false };
+        case actions.NAV_LOCK:
+            return {...state, navLock: true, navMini: true };
+        case actions.NAV_UNLOCK:
+            return {...state, navLock: false };
 
         case actions.P_MODAL_OPENED:
             return {...state, pModal: true };
@@ -71,6 +75,14 @@ const rootReducer = (state = {}, action) => {
             return {
                 ...state,
                 tasks: state.tasks.filter((t) => t.id !== action.payload),
+            };
+        case actions.MSG_SENT:
+            return {
+                ...state,
+                chats: [
+                    ...state.chats,
+                    {...action.payload, id: state.chats.length + 1 },
+                ], //!CHANGE THIS TO GET ASSIGN IN DB
             };
 
         default:

@@ -77,3 +77,65 @@ export const tasks = [{
         tags: [],
     },
 ];
+
+export const chats = [{
+        id: 1,
+        text: 'Hello 1',
+        name: 'brian',
+        date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
+    },
+    {
+        id: 2,
+        text: 'Hello you 2',
+        name: 'brian',
+        date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
+    },
+    {
+        id: 3,
+        text: 'Hello 3',
+        name: 'brian',
+        date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
+    },
+    {
+        id: 4,
+        text: '4 Lorem ipsum for an an ipsum for an an',
+        name: 'me',
+        date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
+    },
+    {
+        id: 5,
+        text: 'Hello 5',
+        name: 'me',
+        date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
+    },
+    {
+        id: 6,
+        text: 'Hello 6',
+        name: 'Joe',
+        date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
+    },
+    {
+        id: 7,
+        text: 'Hello 7',
+        name: 'brian',
+        date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
+    },
+    {
+        id: 8,
+        text: 'Hello 8',
+        name: 'Leat',
+        date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
+    },
+    {
+        id: 9,
+        text: 'Hello 9',
+        name: 'brian',
+        date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
+    },
+    {
+        id: 10,
+        text: 'Lorem ipsum for an an ipsum for an an ipsum for an an ipsum for an an',
+        name: 'Leat',
+        date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
+    },
+];

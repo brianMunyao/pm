@@ -1,5 +1,7 @@
 export const NAV_MINI = 'navMinimized';
 export const NAV_MAX = 'navMaximized';
+export const NAV_LOCK = 'navLocked';
+export const NAV_UNLOCK = 'navUnlocked';
 
 export const P_MODAL_OPENED = 'pModalOpened';
 export const P_MODAL_CLOSED = 'pModalClosed';
@@ -17,3 +19,5 @@ export const PROJECT_DELETED = 'projectDeleted';
 export const TASK_CREATED = 'taskCreated';
 export const TASK_UPDATED = 'taskUpdated';
 export const TASK_DELETED = 'taskDeleted';
+
+export const MSG_SENT = 'msgSent';

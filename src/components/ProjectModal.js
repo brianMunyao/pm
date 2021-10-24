@@ -197,9 +197,9 @@ const ColorIcon = styled.div`
 	}
 `;
 
-const matchStateToProps = ({ pModal, pEdit }) => ({ pModal, pEdit });
+const mapStateToProps = ({ pModal, pEdit }) => ({ pModal, pEdit });
 
-export default connect(matchStateToProps, {
+export default connect(mapStateToProps, {
 	closePModal,
 	addProject,
 	updateProject,

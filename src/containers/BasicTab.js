@@ -11,8 +11,10 @@ const BasicTab = ({ children, title }) => {
 };
 
 const Container = styled.div`
-	height: 100%;
+	height: 100vh;
 	overflow: auto;
+	/* background: red; */
+	/* padding: 0 0 10px; */
 	.tab-title {
 		font-size: 23px;
 		font-weight: 700;

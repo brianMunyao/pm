@@ -265,7 +265,7 @@ const Container = styled.div`
 
 	&:hover {
 		box-shadow: 0px 1px 10px #d6d6d6;
-		transform: scale(1.05);
+		transform: scale(1.015);
 	}
 
 	.ti-title {

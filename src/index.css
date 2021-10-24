@@ -26,3 +26,24 @@ textarea:focus {
     justify-content: center;
     align-items: center;
 }
+
+::-webkit-scrollbar {
+    width: 11px;
+}
+
+::-webkit-scrollbar-thumb {
+    border: 2px solid #e0e0e0;
+    background: #77aebb;
+    /* background: #2b6674; */
+    border-radius: 20px;
+    transition: all 0.2s linear;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #64a3b1;
+}
+
+::-webkit-scrollbar-track {
+    background: #e0e0e0;
+    width: 5px;
+}

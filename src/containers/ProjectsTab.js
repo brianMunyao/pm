@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
 import {
 	IoAddCircleOutline,
 	IoAddOutline,
 	IoChevronBack,
+	IoPaperPlaneOutline,
 } from 'react-icons/io5';
 import { connect } from 'react-redux';
+import moment from 'moment';
+import axios from 'axios';
+import ioClient from 'socket.io-client';
 
 import ProjectCard from '../components/ProjectCard';
 import BasicTab from './BasicTab';
@@ -21,9 +25,13 @@ import {
 	deleteProject,
 	addTask,
 	updateTask,
+	sendMsg,
 } from '../store/actions';
 
+const socket = ioClient.connect('http://localhost:8000');
+
 const ProjectsTab = ({
+	chats,
 	tasks,
 	projects,
 	openPModal,
@@ -35,21 +43,70 @@ const ProjectsTab = ({
 	deleteProject,
 	addTask,
 	updateTask,
+	sendMsg,
 }) => {
 	const [backlog, setBacklog] = useState([]);
 	const [inprogress, setInprogress] = useState([]);
 	const [completed, setCompleted] = useState([]);
+	const [msg, setMsg] = useState('');
+
+	const handleMsg = () => {
+		if (msg.trim().length > 0) {
+			sendMsg({
+				text: msg,
+				date: moment().toLocaleString(),
+				name: 'me',
+			});
+			setMsg('');
+			// axios
+			// 	.post('http://localhost:8000/api/chats', {
+			// 		text: msg,
+			// 		date: moment().toLocaleString(),
+			// 		name: 'me',
+			// 	})
+			// 	.then((res) => {
+			// 		sendMsg({
+			// 			text: msg,
+			// 			date: moment().toLocaleString(),
+			// 			name: 'me',
+			// 		});
+			// 	}).then
+			// 	.catch((e) => setMsg(e));
+		}
+		updateScroll();
+	};
 
 	const getProject = (id) => projects.filter((item) => item.id === id)[0];
 
 	const getTaskByID = (id) => tasks.filter((t) => t.id === id)[0];
 
+	const handleOpenProject = (id) => openProject(id);
+	const handleCloseProject = () => closeProject();
+
+	const updateScroll = useCallback(async () => {
+		if (openedProject) {
+			const elem = await document.querySelector('.pt-chats');
+			elem.scrollTop = elem.scrollHeight;
+		}
+	}, [chats]);
+
 	useEffect(() => {
+		socket.on('chat', (res) => {
+			console.log(10);
+			// handleMsg
+			// return sendMsg({
+			// 	text: res.chat,
+			// 	date: moment().toLocaleString(),
+			// 	name: 'server',
+			// });
+		});
+
 		const ptasks = tasks.filter((t) => t.project_id === openedProject);
 		setBacklog(ptasks.filter((t) => t.status === 0));
 		setInprogress(ptasks.filter((t) => t.status === 1));
 		setCompleted(ptasks.filter((t) => t.status === 2));
-	}, [tasks, openedProject]);
+		updateScroll();
+	}, [tasks, sendMsg, openedProject, updateScroll]);
 
 	const DnD = ({ list, id }) => (
 		<Droppable droppableId={id}>
@@ -74,7 +131,7 @@ const ProjectsTab = ({
 					{provided.placeholder}
 
 					<div
-						className="pt-add"
+						className="pt-add fja"
 						onClick={() => {
 							addTask({
 								title: 'new task',
@@ -112,9 +169,6 @@ const ProjectsTab = ({
 		const result = Array.from(list);
 		const [removed] = result.splice(startIndex, 1);
 		result.splice(endIndex, 0, removed);
-
-		// console.log(list);
-		// console.log(result);
 
 		return result;
 	};
@@ -198,33 +252,31 @@ const ProjectsTab = ({
 	};
 
 	return (
-		<BasicTab>
-			<Container>
-				{openedProject ? (
-					<div className="pt-top-alt">
-						<span className="pt-back fja" onClick={closeProject}>
-							<IoChevronBack /> Back to projects
-						</span>
+		<Container>
+			{openedProject ? (
+				<div className="pt-top-alt">
+					<span className="pt-back fja" onClick={handleCloseProject}>
+						<IoChevronBack /> Back to projects
+					</span>
 
-						<h2 className="pt-title">
-							{getProject(openedProject).title}
-						</h2>
+					<h2 className="pt-title">
+						{getProject(openedProject).title}
+					</h2>
+				</div>
+			) : (
+				<div className="pt-top">
+					<div>
+						<h2 className="pt-title">Projects</h2>
 					</div>
-				) : (
-					<div className="pt-top">
-						<div>
-							<h2 className="pt-title" onClick={closeProject}>
-								Projects
-							</h2>
-						</div>
 
-						<div className="pt-add-btn fja" onClick={openPModal}>
-							<IoAddOutline /> Add Project
-						</div>
+					<div className="pt-add-btn fja" onClick={openPModal}>
+						<IoAddOutline /> Add Project
 					</div>
-				)}
+				</div>
+			)}
 
-				{openedProject ? (
+			{openedProject ? (
+				<div className="pt-open-con">
 					<DragDropContext onDragEnd={onDragEnd}>
 						<div className="pt-open">
 							<div className="pt-backlog">
@@ -247,26 +299,72 @@ const ProjectsTab = ({
 							</div>
 						</div>
 					</DragDropContext>
-				) : (
-					<div className="pt-list">
-						{projects.map((p, i) => (
-							<ProjectCard
-								data={p}
-								key={i}
-								onClick={() => openProject(p.id)}
-								openUpdate={() => openPEdit(p)}
-								closeUpdate={closePEdit}
-								deleteProject={() => deleteProject(p.id)}
+
+					<div className="pt-side-chat">
+						<p className="pt-chat-title">Group Chat</p>
+						<div className="pt-chats">
+							{[...chats].slice(0).map((c, i) => (
+								<Chat me={c.name === 'me'} key={i}>
+									{/** //! CHANGE THIS TO USERID */}
+									<div className="pt-chat-inner">
+										{c.name !== 'me' && (
+											<span className="pt-chat-name">
+												{c.name}
+											</span>
+										)}
+										<span className="pt-chat-text">
+											{c.text}
+										</span>
+										<span className="pt-chat-date">
+											{moment(c.date).format('HH:MM')}
+										</span>
+									</div>
+								</Chat>
+							))}
+						</div>
+
+						<div className="pt-chats-input">
+							<input
+								autoFocus
+								type="text"
+								placeholder="Enter a message"
+								value={msg}
+								onChange={(e) => setMsg(e.target.value)}
+								onKeyPress={(e) =>
+									e.key === 'Enter' && handleMsg()
+								}
 							/>
-						))}
+
+							<span
+								className="pt-chats-send fja"
+								onClick={handleMsg}>
+								<IoPaperPlaneOutline />
+							</span>
+						</div>
 					</div>
-				)}
-			</Container>
-		</BasicTab>
+				</div>
+			) : (
+				<div className="pt-list">
+					{projects.map((p, i) => (
+						<ProjectCard
+							data={p}
+							key={i}
+							onClick={() => handleOpenProject(p.id)}
+							openUpdate={() => openPEdit(p)}
+							closeUpdate={closePEdit}
+							deleteProject={() => deleteProject(p.id)}
+						/>
+					))}
+				</div>
+			)}
+		</Container>
 	);
 };
 const Container = styled.div`
-	padding: 10px;
+	overflow: hidden;
+	display: flex;
+	flex-flow: column;
+	height: 100%;
 
 	.pt-title {
 		letter-spacing: 0.3px;
@@ -318,57 +416,163 @@ const Container = styled.div`
 		}
 	}
 
-	.pt-open {
+	.pt-open-con {
+		flex: 1;
+		/*display: flex;
+		flex-flow: row;
+		flex-direction: row; */
+		overflow: auto;
 		display: grid;
-		width: 100%;
-		grid-template-columns: repeat(3, minmax(250px, 1fr));
-		column-gap: 10px;
-		.pt-backlog,
-		.pt-inprogress,
-		.pt-complete {
-			padding: 10px;
+		grid-template-columns: 1fr 300px;
+		grid-template-rows: 100%;
+
+		.pt-side-chat,
+		.pt-open {
+			width: 100%;
+			height: 100%;
 		}
 
-		.pt-todos-title {
-			padding: 0 10px 10px;
-			font-weight: 600;
-			font-size: 17px;
-			letter-spacing: 0.2px;
-			opacity: 0.7;
-		}
-		.pt-add {
-			background: ${colors.primaryLightest};
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 7px 10px;
-			border-radius: 8px;
-			user-select: none;
-			cursor: pointer;
-			transition: all 0.1s linear;
-			&:hover {
-				transform: scale(1.05);
+		.pt-open {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(200px, 1fr));
+			column-gap: 25px;
+			flex: 1;
+			padding: 10px;
+			overflow-y: auto;
+
+			.pt-todos-title {
+				padding: 0 10px 10px;
+				font-weight: 600;
+				font-size: 17px;
+				letter-spacing: 0.2px;
+				opacity: 0.7;
 			}
-			svg {
-				margin-right: 5px;
+			.pt-add {
+				background: ${colors.primaryLightest};
+				padding: 7px 10px;
+				border-radius: 8px;
+				user-select: none;
+				cursor: pointer;
+				transition: all 0.1s linear;
+				&:hover {
+					transform: scale(1.015);
+				}
+				svg {
+					margin-right: 5px;
+				}
+			}
+		}
+
+		.pt-side-chat {
+			border-left: 2px solid #ecececce;
+			background: #f0f0f0ce;
+			display: grid;
+			grid-template-columns: 100%;
+			grid-template-rows: auto 1fr 56px;
+			row-gap: 10px;
+			padding: 0 0 10px;
+			.pt-chat-title {
+				font-weight: 600;
+				opacity: 0.8;
+				padding: 5px 5px 0;
+			}
+
+			.pt-chats {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				overflow-y: auto;
+				padding: 0 5px;
+			}
+			.pt-chats-input {
+				background: white;
+				height: 100%;
+				display: flex;
+				color: #3f3f3f;
+				margin: 0 10px;
+				border-radius: 8px;
+				box-shadow: 2px 3px 10px #9e9e9e4b;
+				overflow: hidden;
+
+				input {
+					padding: 5px 10px;
+					font-size: inherit;
+					flex: 1;
+				}
+				.pt-chats-send {
+					background: ${colors.primary};
+					color: white;
+					height: 43px;
+					width: 43px;
+					margin: 7px;
+					font-size: 22px;
+					border-radius: 8px;
+					cursor: pointer;
+				}
 			}
 		}
 	}
 
 	.pt-list {
+		padding: 10px 15px;
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 		gap: 20px;
+		height: 100%;
+		overflow-y: auto;
+	}
+
+	@media (max-width: 850px) {
+		.pt-open-con {
+			.pt-open {
+				column-gap: 15px;
+			}
+		}
 	}
 `;
 
-const matchStateToProps = ({ openedProject, projects, tasks }) => ({
+const Chat = styled.div`
+	display: flex;
+	justify-content: ${({ me }) => (me ? 'flex-end' : 'flex-start')};
+
+	.pt-chat-inner {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		background: ${({ me }) => (me ? colors.primaryLight : 'white')};
+		color: ${({ me }) => me && 'white'};
+		border-radius: 7px;
+		padding: 4px 8px;
+		margin: 4px 0;
+		box-shadow: 2px 3px 10px #eeeeee;
+		max-width: 80%;
+		min-width: 100px;
+		width: fit-content;
+		.pt-chat-name {
+			font-size: 13px;
+			font-weight: 600;
+			opacity: 0.8;
+			letter-spacing: 0.3px;
+			color: ${colors.primary};
+		}
+		.pt-chat-date {
+			margin-left: auto;
+			letter-spacing: 0.5px;
+			font-size: 10px;
+			font-weight: 600;
+			opacity: 0.7;
+		}
+	}
+`;
+
+const mapStateToProps = ({ openedProject, projects, tasks, chats }) => ({
+	chats,
 	openedProject,
 	projects,
 	tasks,
 });
 
-export default connect(matchStateToProps, {
+export default connect(mapStateToProps, {
 	openPModal,
 	openPEdit,
 	closePEdit,
@@ -377,4 +581,5 @@ export default connect(matchStateToProps, {
 	deleteProject,
 	addTask,
 	updateTask,
+	sendMsg,
 })(ProjectsTab);

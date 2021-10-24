@@ -1,3 +1,4 @@
+import axios from 'axios';
 import * as actions from './actionsTypes';
 
 //action creators
@@ -6,6 +7,12 @@ const navMinimized = () => ({
 });
 const navMaximized = () => ({
     type: actions.NAV_MAX,
+});
+const navLocked = () => ({
+    type: actions.NAV_LOCK,
+});
+const navUnlocked = () => ({
+    type: actions.NAV_UNLOCK,
 });
 
 const pModalOpened = () => ({
@@ -57,12 +64,23 @@ const taskDeleted = (id) => ({
     payload: id,
 });
 
+const msgSent = (payload) => ({
+    type: actions.MSG_SENT,
+    payload,
+});
+
 // actions
 export const minimizeNav = () => (dispatch) => {
     dispatch(navMinimized());
 };
 export const maximizeNav = () => (dispatch) => {
     dispatch(navMaximized());
+};
+export const lockNav = () => (dispatch) => {
+    dispatch(navLocked());
+};
+export const unlockNav = () => (dispatch) => {
+    dispatch(navUnlocked());
 };
 
 export const openPModal = () => (dispatch) => {
@@ -82,9 +100,11 @@ export const closePEdit = () => (dispatch) => {
 
 export const openProject = (id) => (dispatch) => {
     dispatch(projectOpened(id));
+    dispatch(navLocked());
 };
 export const closeProject = () => (dispatch) => {
     dispatch(projectClosed());
+    dispatch(navUnlocked());
 };
 
 export const addProject = (payload) => (dispatch) => {
@@ -105,4 +125,8 @@ export const updateTask = (payload) => (dispatch) => {
 };
 export const deleteTask = (id) => (dispatch) => {
     dispatch(taskDeleted(id));
+};
+
+export const sendMsg = (payload) => (dispatch) => {
+    dispatch(msgSent(payload));
 };
