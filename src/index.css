@@ -34,7 +34,6 @@ textarea:focus {
 ::-webkit-scrollbar-thumb {
     border: 2px solid #e0e0e0;
     background: #77aebb;
-    /* background: #2b6674; */
     border-radius: 20px;
     transition: all 0.2s linear;
 }

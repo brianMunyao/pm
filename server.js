@@ -24,8 +24,9 @@ io.once('connection', (socket) => {
 
 app.post('/api/chats', (req, res) => {
     // app.get('io').emit('chat', { chat: req.body.text });
-    console.log(req.path);
-    res.json(req.body);
+    console.log(req.body);
+
+    res.json('hello');
 });
 
 server.listen(PORT, () => console.log(`Listening on PORT ${PORT}`));

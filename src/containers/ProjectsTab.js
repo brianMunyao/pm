@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 import axios from 'axios';
 import ioClient from 'socket.io-client';
+import { useHistory, useLocation } from 'react-router';
 
 import ProjectCard from '../components/ProjectCard';
 import BasicTab from './BasicTab';
@@ -49,6 +50,9 @@ const ProjectsTab = ({
 	const [inprogress, setInprogress] = useState([]);
 	const [completed, setCompleted] = useState([]);
 	const [msg, setMsg] = useState('');
+
+	const location = useLocation();
+	const history = useHistory();
 
 	const handleMsg = () => {
 		if (msg.trim().length > 0) {
@@ -91,22 +95,36 @@ const ProjectsTab = ({
 	}, [chats]);
 
 	useEffect(() => {
-		socket.on('chat', (res) => {
-			console.log(10);
-			// handleMsg
-			// return sendMsg({
-			// 	text: res.chat,
-			// 	date: moment().toLocaleString(),
-			// 	name: 'server',
-			// });
-		});
+		// socket.on('chat', (res) => {
+		// 	console.log(10);
+		// 	// handleMsg
+		// 	// return sendMsg({
+		// 	// 	text: res.chat,
+		// 	// 	date: moment().toLocaleString(),
+		// 	// 	name: 'server',
+		// 	// });
+		// });
 
 		const ptasks = tasks.filter((t) => t.project_id === openedProject);
 		setBacklog(ptasks.filter((t) => t.status === 0));
 		setInprogress(ptasks.filter((t) => t.status === 1));
 		setCompleted(ptasks.filter((t) => t.status === 2));
 		updateScroll();
-	}, [tasks, sendMsg, openedProject, updateScroll]);
+
+		if (location.state) {
+			openProject(location.state);
+			history.replace(location.pathname);
+		}
+	}, [
+		tasks,
+		sendMsg,
+		openedProject,
+		updateScroll,
+		location.state,
+		openProject,
+		history,
+		location.pathname,
+	]);
 
 	const DnD = ({ list, id }) => (
 		<Droppable droppableId={id}>
