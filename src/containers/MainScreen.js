@@ -4,10 +4,12 @@ import {
 	IoChatbubbleEllipsesOutline,
 	IoFileTrayFullOutline,
 	IoGridOutline,
+	IoPower,
 	IoSettingsOutline,
 } from 'react-icons/io5';
-import { Link, Route, Switch, useLocation } from 'react-router-dom';
+import { Link, Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { useCookies } from 'react-cookie';
 
 import Logo from '../components/Logo';
 import colors from '../config/colors';
@@ -17,6 +19,7 @@ import ProjectModal from '../components/ProjectModal';
 import InboxTab from './InboxTab';
 import AppToolTip from '../components/AppToolTip';
 import DashTab from './DashTab';
+import { isLoggedIn } from '../apis/users';
 
 const navs = [
 	{ title: 'Dashboard', Icon: IoGridOutline, to: '/m' },
@@ -34,6 +37,7 @@ const MainScreen = ({
 	closeProject,
 }) => {
 	const [activeNav, setActiveNav] = useState(0);
+	const [cookies, removeCookie] = useCookies(['user']);
 
 	const switchTabs = (id) => {
 		if (id !== openedProject) {
@@ -42,10 +46,30 @@ const MainScreen = ({
 		}
 	};
 
-	const NavItem = ({ id, data: { title, Icon, to } }) => {
-		if (navMini) {
+	const NavItem = ({ id, data: { title, Icon, to }, onClick }) => {
+		if (onClick) {
 			return (
-				<Link to={to}>
+				<div>
+					{navMini ? (
+						<AppToolTip title={title}>
+							<div className="nav-item logout" onClick={onClick}>
+								<Icon />
+								<span>{title}</span>
+							</div>
+						</AppToolTip>
+					) : (
+						<div className="nav-item logout" onClick={onClick}>
+							<Icon />
+							<span>{title}</span>
+						</div>
+					)}
+				</div>
+			);
+		}
+
+		return (
+			<Link to={to}>
+				{navMini ? (
 					<AppToolTip title={title}>
 						<div
 							className={`nav-item ${
@@ -56,11 +80,7 @@ const MainScreen = ({
 							<span>{title}</span>
 						</div>
 					</AppToolTip>
-				</Link>
-			);
-		} else {
-			return (
-				<Link to={to}>
+				) : (
 					<div
 						className={`nav-item ${
 							id === activeNav ? 'nav-active' : 'nav-inactive'
@@ -69,9 +89,9 @@ const MainScreen = ({
 						<Icon />
 						<span>{title}</span>
 					</div>
-				</Link>
-			);
-		}
+				)}
+			</Link>
+		);
 	};
 
 	const getWidth = useCallback(() => {
@@ -81,6 +101,8 @@ const MainScreen = ({
 		}
 	}, [maximizeNav, minimizeNav, navMini, navLock]);
 
+	const logout = () => removeCookie('user');
+
 	const location = useLocation();
 	useEffect(() => {
 		getWidth();
@@ -88,18 +110,25 @@ const MainScreen = ({
 		window.addEventListener('resize', getWidth);
 	}, [location, getWidth]);
 
+	if (!isLoggedIn(cookies)) return <Redirect to="/login" />;
+
 	return (
 		<Main navMini={navMini}>
 			<nav>
-				<Logo size={35} align="center" />
+				<div>
+					<Logo size={35} align="center" />
 
-				{navs.map((n, i) => (
-					<NavItem id={i} data={n} key={i} />
-				))}
+					{navs.map((n, i) => (
+						<NavItem id={i} data={n} key={i} />
+					))}
+				</div>
 
-				{/* <div className="nav-logout">
-					<IoPower /> Logout
-				</div> */}
+				<div className="nav-logout">
+					<NavItem
+						data={{ Icon: IoPower, title: 'Logout' }}
+						onClick={logout}
+					/>
+				</div>
 			</nav>
 
 			<main>
@@ -141,6 +170,10 @@ const Main = styled.div`
 		left: 0;
 		width: ${({ navMini }) => (navMini ? '70px' : '200px')};
 		border-right: 2px solid #f0f0f0ce;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding-bottom: 30px;
 
 		.nav-item {
 			height: ${({ navMini }) => (navMini ? '50px' : '40px')};
@@ -181,6 +214,16 @@ const Main = styled.div`
 			}
 			opacity: 0.8;
 		}
+
+		.nav-item.logout {
+			background: ${colors.errorLight};
+			color: ${colors.error};
+			&:hover {
+				color: white;
+				background: ${colors.error};
+			}
+		}
+
 		.logo {
 			margin: ${({ navMini }) => (navMini ? '10px 0 20px' : '10px 0')};
 		}

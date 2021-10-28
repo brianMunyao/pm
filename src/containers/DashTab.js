@@ -6,6 +6,7 @@ import moment from 'moment';
 import { TextField } from '@mui/material';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router';
+import { useCookies } from 'react-cookie';
 
 import colors from '../config/colors';
 import { getColor, getDatedTransactions, getLightColor } from '../apis/funcs';
@@ -20,6 +21,7 @@ const DashTab = ({ projects, tasks }) => {
 	const [tasksDue, setTasksDue] = useState([]);
 
 	const [pView, setPView] = useState([]);
+	const [cookies] = useCookies(['user']);
 
 	const history = useHistory();
 
@@ -65,7 +67,9 @@ const DashTab = ({ projects, tasks }) => {
 		<Container>
 			<div className="dt-main">
 				<div className="dt-header">
-					<p className="dt-header-title">Welcome Watson</p>
+					<p className="dt-header-title">
+						Welcome {cookies.user.fullname}
+					</p>
 					<p className="dt-header-subtitle">
 						Let's Organize Your Project Tasks
 					</p>
