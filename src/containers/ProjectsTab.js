@@ -4,8 +4,11 @@ import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
 import {
 	IoAddCircleOutline,
 	IoAddOutline,
+	IoChatbubbles,
 	IoChevronBack,
+	IoGridOutline,
 	IoPaperPlaneOutline,
+	IoReorderFour,
 } from 'react-icons/io5';
 import { connect } from 'react-redux';
 import moment from 'moment';
@@ -14,8 +17,8 @@ import ioClient from 'socket.io-client';
 import { useHistory, useLocation } from 'react-router';
 
 import ProjectCard from '../components/ProjectCard';
-import BasicTab from './BasicTab';
 import TaskItem from '../components/TaskItem';
+import RadioGroup from '../components/RadioGroup';
 import colors from '../config/colors';
 import {
 	openPModal,
@@ -51,6 +54,10 @@ const ProjectsTab = ({
 	const [completed, setCompleted] = useState([]);
 	const [msg, setMsg] = useState('');
 
+	const [chatOpen, setChatOpen] = useState(false);
+	const [listStyle, setListStyle] = useState('grid');
+	const getListStyle = (val) => setListStyle(val);
+
 	const location = useLocation();
 	const history = useHistory();
 
@@ -79,6 +86,8 @@ const ProjectsTab = ({
 		}
 		updateScroll();
 	};
+
+	const toggleChat = () => setChatOpen(!chatOpen);
 
 	const getProject = (id) => projects.filter((item) => item.id === id)[0];
 
@@ -126,25 +135,34 @@ const ProjectsTab = ({
 		location.pathname,
 	]);
 
-	const DnD = ({ list, id }) => (
+	const DnD = ({ list, id, lStyle }) => (
 		<Droppable droppableId={id}>
 			{(provided, sn) => (
 				<div {...provided.droppableProps} ref={provided.innerRef}>
-					{list.map((t, i) => (
-						<Draggable
-							key={t.id}
-							index={i}
-							draggableId={t.id.toString()}>
-							{(p, s) => (
-								<div
-									ref={p.innerRef}
-									{...p.draggableProps}
-									{...p.dragHandleProps}>
-									<TaskItem data={t} />
-								</div>
-							)}
-						</Draggable>
-					))}
+					{list.length > 0 ? (
+						list.map((t, i) => (
+							<Draggable
+								key={t.id}
+								index={i}
+								draggableId={t.id.toString()}>
+								{(p, s) => (
+									<div
+										ref={p.innerRef}
+										{...p.draggableProps}
+										{...p.dragHandleProps}>
+										{/* {listStyle === 'list' ? (
+										<TaskItemList data={t} />
+									) : (
+										<TaskItem data={t} />
+									)} */}
+										<TaskItem data={t} listStyle={lStyle} />
+									</div>
+								)}
+							</Draggable>
+						))
+					) : (
+						<TaskItem empty />
+					)}
 
 					{provided.placeholder}
 
@@ -270,16 +288,39 @@ const ProjectsTab = ({
 	};
 
 	return (
-		<Container>
+		<Container chatOpen={chatOpen}>
 			{openedProject ? (
 				<div className="pt-top-alt">
 					<span className="pt-back fja" onClick={handleCloseProject}>
 						<IoChevronBack /> Back to projects
 					</span>
 
-					<h2 className="pt-title">
-						{getProject(openedProject).title}
-					</h2>
+					<div className="pt-top-name">
+						<h2 className="pt-title">
+							{getProject(openedProject).title}
+						</h2>
+						<div>
+							<RadioGroup
+								data={[
+									{
+										icon: <IoGridOutline />,
+										value: 'grid',
+										label: 'Grid View',
+									},
+									{
+										icon: <IoReorderFour />,
+										value: 'list',
+										label: 'List View',
+									},
+								]}
+								onChange={getListStyle}
+							/>
+							<IoChatbubbles
+								className="chat-icon"
+								onClick={toggleChat}
+							/>
+						</div>
+					</div>
 				</div>
 			) : (
 				<div className="pt-top">
@@ -296,24 +337,37 @@ const ProjectsTab = ({
 			{openedProject ? (
 				<div className="pt-open-con">
 					<DragDropContext onDragEnd={onDragEnd}>
-						<div className="pt-open">
+						<div
+							className={`pt-open ${
+								listStyle === 'list'
+									? 'pt-list-view'
+									: 'pt-kanban-view'
+							}`}>
 							<div className="pt-backlog">
 								<div className="pt-todos-title">
 									Backlog ({backlog.length})
 								</div>
-								<DnD list={backlog} id="0" />
+								<DnD list={backlog} id="0" lStyle={listStyle} />
 							</div>
 							<div className="pt-inprogress">
 								<div className="pt-todos-title">
 									In Progress ({inprogress.length})
 								</div>
-								<DnD list={inprogress} id="1" />
+								<DnD
+									list={inprogress}
+									id="1"
+									lStyle={listStyle}
+								/>
 							</div>
 							<div className="pt-complete">
 								<div className="pt-todos-title">
 									Complete ({completed.length})
 								</div>
-								<DnD list={completed} id="2" />
+								<DnD
+									list={completed}
+									id="2"
+									lStyle={listStyle}
+								/>
 							</div>
 						</div>
 					</DragDropContext>
@@ -321,7 +375,7 @@ const ProjectsTab = ({
 					<div className="pt-side-chat">
 						<p className="pt-chat-title">Group Chat</p>
 						<div className="pt-chats">
-							{[...chats].slice(0).map((c, i) => (
+							{chats.map((c, i) => (
 								<Chat me={c.name === 'me'} key={i}>
 									{/** //! CHANGE THIS TO USERID */}
 									<div className="pt-chat-inner">
@@ -432,16 +486,30 @@ const Container = styled.div`
 				margin-top: 2px;
 			}
 		}
+		.pt-top-name {
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			.chat-icon {
+				cursor: pointer;
+				font-size: 20px;
+				color: ${({ chatOpen }) =>
+					chatOpen ? colors.primaryLighter : colors.primaryLight};
+			}
+			div {
+				display: flex;
+				align-items: center;
+			}
+		}
 	}
 
 	.pt-open-con {
 		flex: 1;
-		/*display: flex;
-		flex-flow: row;
-		flex-direction: row; */
-		overflow: auto;
+		overflow: hidden;
 		display: grid;
-		grid-template-columns: 1fr 300px;
+		grid-template-columns: ${({ chatOpen }) =>
+			chatOpen ? '1fr 300px' : '1fr 0'};
 		grid-template-rows: 100%;
 
 		.pt-side-chat,
@@ -451,10 +519,6 @@ const Container = styled.div`
 		}
 
 		.pt-open {
-			display: grid;
-			grid-template-columns: repeat(3, minmax(200px, 1fr));
-			column-gap: 25px;
-			flex: 1;
 			padding: 10px;
 			overflow-y: auto;
 
@@ -481,7 +545,29 @@ const Container = styled.div`
 			}
 		}
 
+		.pt-open.pt-kanban-view {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(200px, 1fr));
+			column-gap: 25px;
+			flex: 1;
+		}
+		.pt-open.pt-list-view {
+			padding: 18px;
+			.pt-todos-title {
+				padding: 10px;
+				font-size: 16px;
+			}
+			.pt-add {
+				padding: 5px;
+				width: 120px;
+				&:hover {
+					transform: translateX(2px);
+				}
+			}
+		}
+
 		.pt-side-chat {
+			overflow: hidden;
 			border-left: 2px solid #ecececce;
 			background: #f0f0f0ce;
 			display: grid;

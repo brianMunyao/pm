@@ -7,7 +7,7 @@ import { getColor, getLightColor } from '../apis/funcs';
 
 const TaskTag = ({ title, deleteTag }) => {
 	return (
-		<Container color={tags[title]}>
+		<Container color={tags[title]} className="fja">
 			{title}
 			<span className="fja" onClick={deleteTag}>
 				<IoClose />
@@ -21,10 +21,11 @@ const Container = styled.span`
 	color: ${({ color }) => getColor(color)};
 	font-size: 11px;
 	font-weight: 600;
-	padding: 2px 8px;
+	padding: 0 8px;
 	border-radius: 4px;
 	margin: 3px 4px;
 	position: relative;
+	height: 18px;
 
 	&:hover {
 		span {

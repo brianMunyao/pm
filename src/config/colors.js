@@ -39,9 +39,16 @@ const colors = {
     lightGreenLight: '#DCEDC8',
     lime: '#AFB42B',
     limeLight: '#F0F4C3',
+    error: '#ff6347',
+    errorLight: '#ff634733',
+    success: '#2dd776',
+    warning: '#fed035',
 
-    error: '#D32F2F',
-    errorLight: '#FFCDD2',
+    white: 'rgb(255,255,255)',
+    darkGrey: 'rgb(68, 68, 68)',
+    grey: '#b2b1b0',
+    lightGrey: 'rgb(235, 235, 235)',
+    greyish: '#818181',
 };
 
 export default colors;

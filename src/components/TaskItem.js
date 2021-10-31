@@ -19,8 +19,9 @@ import colors from '../config/colors';
 import { updateTask, deleteTask } from '../store/actions';
 import TaskTag from './TaskTag';
 import AppToolTip from './AppToolTip';
+import emptyImg from '../assets/empty.png';
 
-const TaskItem = ({ data, updateTask, deleteTask }) => {
+const TaskItem = ({ data, updateTask, deleteTask, listStyle, empty }) => {
 	const [taskInfo, setTaskInfo] = useState({});
 	const [editMode, setEditMode] = useState(false);
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -44,6 +45,8 @@ const TaskItem = ({ data, updateTask, deleteTask }) => {
 	};
 
 	const markComplete = () => updateTask({ ...taskInfo, status: 2 });
+	const checkMark = (e) =>
+		updateTask({ ...taskInfo, status: e.target.value === 'true' ? 1 : 2 });
 
 	const assignTask = () => updateTask({ ...taskInfo, assigned: 'Random' });
 
@@ -64,8 +67,30 @@ const TaskItem = ({ data, updateTask, deleteTask }) => {
 		setTaskInfo(data);
 	}, [data]);
 
+	if (empty)
+		return (
+			<Empty>
+				<div className="dt-empty fja">
+					<div className="fja">
+						<img src={emptyImg} alt="empty" />
+						<span>No tasks</span>
+					</div>
+				</div>
+			</Empty>
+		);
+
 	return (
-		<Container>
+		<Container list={listStyle === 'list'}>
+			{listStyle === 'list' && (
+				<input
+					type="checkbox"
+					className="ti-check"
+					checked={data.status === 2}
+					value={data.status === 2}
+					onChange={checkMark}
+				/>
+			)}
+
 			<div className="ti-title">
 				{editMode ? (
 					<textarea
@@ -80,22 +105,37 @@ const TaskItem = ({ data, updateTask, deleteTask }) => {
 						}
 						placeholder="new task"></textarea>
 				) : (
-					<p onDoubleClick={toggleEditMode}>{data.title}</p>
+					<div
+						className="ti-title-hover"
+						onDoubleClick={toggleEditMode}>
+						<span className="ti-title-span">{data.title}</span>
+					</div>
 				)}
+
+				{listStyle === 'list' &&
+					data.tags.map((t, i) => (
+						<TaskTag
+							title={t}
+							key={i}
+							deleteTag={() => handleDelTag(t)}
+						/>
+					))}
 			</div>
 
-			<div className="ti-tags">
-				{data.tags.map((t, i) => (
-					<TaskTag
-						title={t}
-						key={i}
-						deleteTag={() => handleDelTag(t)}
-					/>
-				))}
-			</div>
+			{listStyle !== 'list' && (
+				<div className="ti-tags">
+					{data.tags.map((t, i) => (
+						<TaskTag
+							title={t}
+							key={i}
+							deleteTag={() => handleDelTag(t)}
+						/>
+					))}
+				</div>
+			)}
 
 			<div className="ti-bottom">
-				<div>
+				<div className="ti-dashed-con">
 					{data.assigned ? (
 						<AppToolTip title={data.assigned}>
 							<Avatar
@@ -190,7 +230,7 @@ const TaskItem = ({ data, updateTask, deleteTask }) => {
 						</AppToolTip>
 					</span>
 
-					{data.status !== 2 && (
+					{data.status !== 2 && listStyle !== 'list' && (
 						<AppToolTip title="Mark complete" placement="top">
 							<span className="ti-check" onClick={markComplete}>
 								<IoCheckmark />
@@ -263,32 +303,40 @@ const Container = styled.div`
 	user-select: none;
 	background: white;
 
+	display: ${({ list }) => list && 'flex'};
+	align-items: ${({ list }) => list && 'center'};
+
 	&:hover {
 		box-shadow: 0px 1px 10px #d6d6d6;
 		transform: scale(1.015);
 	}
+	.ti-check {
+		margin: 0 5px;
+	}
 
 	.ti-title {
-		width: 100%;
-		* {
+		flex: 1;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		.ti-title-hover {
 			padding: 3px;
-		}
-		p {
-			cursor: text;
-			border: 1px dashed transparent;
 			border-radius: 5px;
 			transition: all 0.2s linear;
-			word-wrap: break-word;
+			border: 1px dashed transparent;
+			cursor: text;
 			&:hover {
 				border: 1px dashed ${colors.primaryLight};
 			}
 		}
-
 		textarea {
+			padding: 3px;
 			width: 100%;
 			font-size: inherit;
 			border: 1px dashed ${colors.primaryLight};
 			border-radius: 5px;
+			resize: vertical;
 		}
 	}
 
@@ -302,8 +350,13 @@ const Container = styled.div`
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		padding: 10px 5px 0;
+		padding: ${({ list }) => !list && '10px 5px 0'};
+		margin-left: ${({ list }) => list && 'auto'};
 		opacity: 0.7;
+		min-width: ${({ list }) => list && '150px'};
+		.ti-dashed-con {
+			padding: ${({ list }) => list && '0 6px'};
+		}
 
 		.ti-dashed {
 			border: 1px dashed black;
@@ -358,6 +411,22 @@ const Container = styled.div`
 		background-color: #ddd270;
 		/* position: absolute; */
 		width: 100px;
+	}
+`;
+
+const Empty = styled.div`
+	.dt-empty {
+		height: 100%;
+		min-height: 100px;
+		div {
+			display: flex;
+			flex-direction: column;
+			font-weight: 600;
+			opacity: 0.3;
+			img {
+				width: 50px;
+			}
+		}
 	}
 `;
 
