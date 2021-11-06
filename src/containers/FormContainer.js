@@ -10,6 +10,7 @@ const FormContainer = ({
 	title,
 	btnText,
 	submitting,
+	disabled,
 	formError,
 	children,
 	onSubmit,
@@ -40,7 +41,8 @@ const FormContainer = ({
 						<FormError>{formError}</FormError>
 						{children}
 						<FormItem
-							disabled={submitting}
+							disabled={disabled}
+							submitting={submitting}
 							inputType="submit"
 							label={btnText}
 						/>

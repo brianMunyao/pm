@@ -12,6 +12,7 @@ import moment from 'moment';
 import ProgressBar from './ProgressBar';
 import { getColor, getLightColor } from '../apis/funcs';
 import AppToolTip from './AppToolTip';
+import UserIcon from './UserIcon';
 import colors from '../config/colors';
 
 const ProjectCard = ({
@@ -115,7 +116,7 @@ const ProjectCard = ({
 				<div>
 					<AvatarGroup max={3}>
 						{members.map((m, i) => (
-							<Avatar key={i} alt={m} src="./e.js" />
+							<UserIcon name={m} size={23} rounded />
 						))}
 					</AvatarGroup>
 				</div>

@@ -6,7 +6,7 @@ import { IoEye, IoEyeOff } from 'react-icons/io5';
 import colors from '../config/colors';
 import animation from '../assets/circle_loader.json';
 
-const FormItemAlt = ({
+const FormItem = ({
 	width,
 	id,
 	Icon,
@@ -18,14 +18,19 @@ const FormItemAlt = ({
 	value,
 	error,
 	disabled,
+	submitting,
 	onChange,
 	onBlur,
 }) => {
 	const [visible, setVisible] = useState(false);
 	if (inputType === 'submit') {
 		return (
-			<FormButton type="submit" disabled={disabled}>
-				{disabled ? (
+			<FormButton
+				type="submit"
+				width={width}
+				submitting={submitting}
+				disabled={disabled || submitting}>
+				{submitting ? (
 					<Lottie
 						isClickToPauseDisabled={true}
 						options={{
@@ -42,7 +47,7 @@ const FormItemAlt = ({
 		);
 	} else if (list) {
 		return (
-			<FormInput icon={Icon} width={width}>
+			<FormInput icon={Icon} width={width} disabled={disabled}>
 				<label htmlFor={id}>{label}</label>
 				<div>
 					<span className="icon">{Icon && <Icon />}</span>
@@ -53,6 +58,7 @@ const FormItemAlt = ({
 						placeholder={placeholder ? placeholder : label}
 						onChange={onChange}
 						onBlur={onBlur}
+						disabled={disabled}
 					/>
 					<datalist id={id}>
 						{list.map((val, i) => (
@@ -65,7 +71,7 @@ const FormItemAlt = ({
 		);
 	} else if (textarea) {
 		return (
-			<FormInput width={width} textarea>
+			<FormInput width={width} textarea disabled={disabled}>
 				<label htmlFor={id}>{label}</label>
 				<div className="textarea">
 					<textarea
@@ -74,14 +80,15 @@ const FormItemAlt = ({
 						value={value}
 						placeholder={placeholder ? placeholder : label}
 						onChange={onChange}
-						onBlur={onBlur}></textarea>
+						onBlur={onBlur}
+						disabled={disabled}></textarea>
 				</div>
 				<p>{error}</p>
 			</FormInput>
 		);
 	} else {
 		return (
-			<FormInput icon={Icon} width={width}>
+			<FormInput icon={Icon} width={width} disabled={disabled}>
 				<label htmlFor={id}>{label}</label>
 				<div>
 					<span className="icon">{Icon && <Icon />}</span>
@@ -100,6 +107,7 @@ const FormItemAlt = ({
 						placeholder={placeholder ? placeholder : label}
 						onChange={onChange}
 						onBlur={onBlur}
+						disabled={disabled}
 					/>
 
 					{inputType === 'password' && (
@@ -117,13 +125,17 @@ const FormItemAlt = ({
 };
 
 const FormInput = styled.div`
-	width: ${(props) => (props.width ? props.width : '100%')};
-	height: ${(props) => (props.textarea ? '82px' : '75px')};
+	width: ${({ width }) => (width ? width : '100%')};
+	height: ${({ textarea }) => (textarea ? '82px' : '75px')};
 	margin: 4px 0;
 	overflow: hidden;
 	display: grid;
 	grid-template-columns: 1fr;
 	grid-template-rows: 18px 1fr 15px;
+	opacity: ${({ disabled }) => disabled && 0.8};
+	* {
+		cursor: ${({ disabled }) => disabled && 'not-allowed'};
+	}
 
 	label {
 		font-size: 12.5px;
@@ -187,10 +199,10 @@ const FormInput = styled.div`
 `;
 
 const FormButton = styled.button`
+	width: ${({ width }) => (width ? width : '100%')};
 	font-size: 15px;
 	margin: 5px 0;
 	height: 35px;
-	width: 100%;
 	cursor: pointer;
 	background: ${colors.primary};
 	color: rgb(240, 240, 240);
@@ -205,8 +217,9 @@ const FormButton = styled.button`
 	}
 	&:disabled {
 		background: ${colors.primaryLight};
+		opacity: 0.7;
 		cursor: not-allowed;
 	}
 `;
 
-export default FormItemAlt;
+export default FormItem;

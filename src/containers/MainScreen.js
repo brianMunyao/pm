@@ -20,6 +20,7 @@ import InboxTab from './InboxTab';
 import AppToolTip from '../components/AppToolTip';
 import DashTab from './DashTab';
 import { isLoggedIn } from '../apis/users';
+import SettingsTab from './SettingsTab';
 
 const navs = [
 	{ title: 'Dashboard', Icon: IoGridOutline, to: '/m' },
@@ -141,7 +142,7 @@ const MainScreen = ({
 					<Route path="/m/inbox" component={() => <InboxTab />} />
 					<Route
 						path="/m/settings"
-						component={() => <div>settings</div>}
+						component={() => <SettingsTab />}
 					/>
 				</Switch>
 			</main>
