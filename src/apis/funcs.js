@@ -1,5 +1,6 @@
 import moment from 'moment';
 import colors from '../config/colors';
+import { projects } from './data';
 
 export const getColor = (color) => colors[color];
 export const getLightColor = (color) => colors[`${color}Light`];
@@ -70,4 +71,12 @@ export const getDatedTransactions = (arr) => {
         });
     }
     return finalArr;
+};
+
+export const getProgress = (tasks) => {
+    const progress =
+        Math.floor(
+            (tasks.filter((t) => t.status === 2).length / tasks.length) * 100 //!CHANGE THIS
+        ) || 0;
+    return progress + '%';
 };

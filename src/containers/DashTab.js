@@ -7,12 +7,13 @@ import { TextField } from '@mui/material';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router';
 import { useCookies } from 'react-cookie';
+import { Link } from 'react-router-dom';
 
 import colors from '../config/colors';
 import { getColor, getDatedTransactions, getLightColor } from '../apis/funcs';
 import empty from '../assets/empty.png';
 import ProjectCardAlt from '../components/ProjectCardAlt';
-import { Link } from 'react-router-dom';
+import TaskItem from '../components/TaskItem';
 
 const DashTab = ({ projects, tasks }) => {
 	const [dateValue, setDateValue] = useState(moment());
@@ -59,6 +60,8 @@ const DashTab = ({ projects, tasks }) => {
 		[projects, tasks]
 	);
 
+	const goToProject = (id) => history.push('/m/projects', id);
+
 	useEffect(() => {
 		handleMonthChange(dateValue);
 	}, [handleMonthChange, dateValue]);
@@ -87,12 +90,34 @@ const DashTab = ({ projects, tasks }) => {
 							<ProjectCardAlt
 								data={p}
 								key={p.id}
-								onClick={() => {
-									history.push('/m/projects', p.id);
-								}}
+								onClick={() => goToProject(p.id)}
 							/>
 						))}
 					</div>
+				</div>
+
+				<div className="dt-bottom">
+					<div className="dt-mytasks">
+						<p className="dt-mytasks-title">My Upcoming Tasks</p>
+						{tasks.length > 0 ? (
+							tasks
+								.slice(0, 4)
+								.map((t, i) => (
+									<TaskItem
+										data={t}
+										key={i}
+										listStyle="list"
+										quickView
+										onClick={() =>
+											goToProject(t.project_id)
+										}
+									/>
+								))
+						) : (
+							<TaskItem empty />
+						)}
+					</div>
+					<div className="dt-some">sdj</div>
 				</div>
 			</div>
 
@@ -119,8 +144,11 @@ const DashTab = ({ projects, tasks }) => {
 									{moment(item.date).format('DD MMMM')}
 								</p>
 								<div>
-									{item.data.map((v) => (
-										<SItem color={v.color}>
+									{item.data.map((v, i) => (
+										<SItem
+											color={v.color}
+											key={i}
+											onClick={() => goToProject(v.id)}>
 											<div className="si-top">
 												<span className="si-dot"></span>
 												<span className="si-type">
@@ -186,7 +214,7 @@ const Container = styled.div`
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				letter-spacing: 0.2px;
+				letter-spacing: 0.4px;
 				padding: 10px 0;
 				.dt-pt-left {
 					font-weight: 700;
@@ -204,6 +232,17 @@ const Container = styled.div`
 				padding: 10px;
 				height: 260px;
 				overflow: hidden;
+			}
+		}
+		.dt-bottom {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			.dt-mytasks {
+				.dt-mytasks-title {
+					letter-spacing: 0.4px;
+					padding: 10px 0;
+					font-weight: 700;
+				}
 			}
 		}
 	}
@@ -276,6 +315,13 @@ const SItem = styled.div`
 	/* border-left: 2px solid
 		${({ color }) => getLightColor(color) || colors.primaryLight}; */
 	margin: 6px 0;
+	user-select: none;
+	cursor: pointer;
+	&:hover {
+		.si-dot {
+			transform: scale(1.5);
+		}
+	}
 	.si-top {
 		display: flex;
 		flex-direction: row;
@@ -287,6 +333,7 @@ const SItem = styled.div`
 			height: 6px;
 			border-radius: 10px;
 			margin-right: 3px;
+			transition: all 0.2s linear;
 			background: ${({ color }) => getColor(color) || colors.primary};
 		}
 		.si-type {

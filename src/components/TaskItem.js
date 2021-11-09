@@ -21,7 +21,15 @@ import TaskTag from './TaskTag';
 import AppToolTip from './AppToolTip';
 import emptyImg from '../assets/empty.png';
 
-const TaskItem = ({ data, updateTask, deleteTask, listStyle, empty }) => {
+const TaskItem = ({
+	data,
+	updateTask,
+	deleteTask,
+	listStyle,
+	empty,
+	quickView,
+	onClick,
+}) => {
 	const [taskInfo, setTaskInfo] = useState({});
 	const [editMode, setEditMode] = useState(false);
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -80,7 +88,10 @@ const TaskItem = ({ data, updateTask, deleteTask, listStyle, empty }) => {
 		);
 
 	return (
-		<Container list={listStyle === 'list'}>
+		<Container
+			list={listStyle === 'list'}
+			onClick={onClick}
+			quickView={quickView}>
 			{listStyle === 'list' && (
 				<input
 					type="checkbox"
@@ -88,39 +99,48 @@ const TaskItem = ({ data, updateTask, deleteTask, listStyle, empty }) => {
 					checked={data.status === 2}
 					value={data.status === 2}
 					onChange={checkMark}
+					onClick={(e) => e.stopPropagation()}
 				/>
 			)}
 
-			<div className="ti-title">
-				{editMode ? (
-					<textarea
-						name="title"
-						id="title"
-						autoFocus
-						value={taskInfo.title}
-						onChange={(e) => handleUpdate('title', e.target.value)}
-						onBlur={updateInfo}
-						onKeyPress={(e) =>
-							e.key === 'Enter' ? updateInfo() : null
-						}
-						placeholder="new task"></textarea>
-				) : (
-					<div
-						className="ti-title-hover"
-						onDoubleClick={toggleEditMode}>
-						<span className="ti-title-span">{data.title}</span>
-					</div>
-				)}
+			{quickView ? (
+				<div className="ti-title">
+					<span className="ti-title-span">{data.title}</span>
+				</div>
+			) : (
+				<div className="ti-title">
+					{editMode ? (
+						<textarea
+							name="title"
+							id="title"
+							autoFocus
+							value={taskInfo.title}
+							onChange={(e) =>
+								handleUpdate('title', e.target.value)
+							}
+							onBlur={updateInfo}
+							onKeyPress={(e) =>
+								e.key === 'Enter' ? updateInfo() : null
+							}
+							placeholder="new task"></textarea>
+					) : (
+						<div
+							className="ti-title-hover"
+							onDoubleClick={toggleEditMode}>
+							<span className="ti-title-span">{data.title}</span>
+						</div>
+					)}
 
-				{listStyle === 'list' &&
-					data.tags.map((t, i) => (
-						<TaskTag
-							title={t}
-							key={i}
-							deleteTag={() => handleDelTag(t)}
-						/>
-					))}
-			</div>
+					{listStyle === 'list' &&
+						data.tags.map((t, i) => (
+							<TaskTag
+								title={t}
+								key={i}
+								deleteTag={() => handleDelTag(t)}
+							/>
+						))}
+				</div>
+			)}
 
 			{listStyle !== 'list' && (
 				<div className="ti-tags">
@@ -239,6 +259,7 @@ const TaskItem = ({ data, updateTask, deleteTask, listStyle, empty }) => {
 					)}
 
 					<span
+						className="ti-settings-btn"
 						aria-label="settings"
 						aria-controls="settings-menu"
 						aria-expanded={settOpen ? 'true' : undefined}
@@ -347,7 +368,8 @@ const Container = styled.div`
 	}
 
 	.ti-bottom {
-		display: flex;
+		display: ${({ quickView }) => (quickView ? 'none' : 'flex')};
+		/* display: flex; */
 		justify-content: space-between;
 		align-items: flex-end;
 		padding: ${({ list }) => !list && '10px 5px 0'};
@@ -398,6 +420,7 @@ const Container = styled.div`
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			/* margin-right: ${({ quickView }) => quickView && '5px'}; */
 			svg {
 				margin-right: 5px;
 			}
@@ -405,12 +428,9 @@ const Container = styled.div`
 				color: ${colors.primary};
 			}
 		}
-	}
-
-	.ti-setting-con {
-		background-color: #ddd270;
-		/* position: absolute; */
-		width: 100px;
+		.ti-settings-btn {
+			display: ${({ quickView }) => quickView && 'none'};
+		}
 	}
 `;
 

@@ -1,20 +1,30 @@
-import { Avatar, AvatarGroup } from '@mui/material';
 import React from 'react';
+import { Avatar, AvatarGroup } from '@mui/material';
 import { IoChatbubbleEllipsesOutline } from 'react-icons/io5';
 import styled from 'styled-components';
+import { connect } from 'react-redux';
 
-import { getColor, getLightColor } from '../apis/funcs';
+import { getByID, getColor, getLightColor, getProgress } from '../apis/funcs';
 import colors from '../config/colors';
 import ProgressBar from './ProgressBar';
+import UserIcon from './UserIcon';
+import { users } from '../apis/data';
 
-const ProjectCardAlt = ({ data, onClick }) => {
-	const { title, type, progress, chats, color, members } = data;
+const ProjectCardAlt = ({ tasks, data, onClick }) => {
+	const { title, type, chats, color, members } = data;
+
 	return (
 		<Container color={color} onClick={onClick}>
 			<div className="pca-members">
-				<AvatarGroup max={3}>
+				{/* <Avatar key={i} alt={m} src="./e.js" /> */}
+				<AvatarGroup max={5}>
 					{members.map((m, i) => (
-						<Avatar key={i} alt={m} src="./e.js" />
+						<UserIcon
+							rounded
+							key={i}
+							name={getByID(m, users).fullname}
+							size={25}
+						/>
 					))}
 				</AvatarGroup>
 				<span></span>
@@ -28,7 +38,9 @@ const ProjectCardAlt = ({ data, onClick }) => {
 			<div className="pca-progress">
 				<p className="pca-progress-title">Progress</p>
 				<ProgressBar
-					width={progress}
+					width={getProgress(
+						tasks.filter((t) => t.project_id === data.id)
+					)}
 					color="white"
 					// bgColor={getLightColor(color)}
 					bgColor="#86868663"
@@ -102,5 +114,5 @@ const Container = styled.div`
 		/* background: ${({ color }) => getColor(color)}; */
 	}
 `;
-
-export default ProjectCardAlt;
+const mapStateToProps = ({ tasks }) => ({ tasks });
+export default connect(mapStateToProps, {})(ProjectCardAlt);

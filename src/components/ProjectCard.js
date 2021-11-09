@@ -8,21 +8,24 @@ import {
 import styled from 'styled-components';
 import { Avatar, AvatarGroup, Menu } from '@mui/material';
 import moment from 'moment';
+import { connect } from 'react-redux';
 
 import ProgressBar from './ProgressBar';
-import { getColor, getLightColor } from '../apis/funcs';
+import { getByID, getColor, getLightColor, getProgress } from '../apis/funcs';
 import AppToolTip from './AppToolTip';
 import UserIcon from './UserIcon';
 import colors from '../config/colors';
+import { users } from '../apis/data';
 
 const ProjectCard = ({
+	tasks,
 	data,
 	onClick,
 	openUpdate,
 	closeUpdate,
 	deleteProject,
 }) => {
-	const { title, type, progress, chats, color, members, due_date } = data;
+	const { title, type, chats, color, members, due_date } = data;
 
 	const [anchorEl, setAnchorEl] = useState(null);
 	const settOpen = Boolean(anchorEl);
@@ -108,15 +111,26 @@ const ProjectCard = ({
 			<p className="pc-type">{type}</p>
 			<div className="pc-progress">
 				<p className="pc-progress-title">Progress</p>
-				<ProgressBar width={progress} color={getColor(color)} />
-				<p className="pc-progress-pge">{progress}</p>
+				<ProgressBar
+					width={getProgress(
+						tasks.filter((t) => t.project_id === data.id)
+					)}
+					color={getColor(color)}
+				/>
+				<p className="pc-progress-pge">
+					{getProgress(tasks.filter((t) => t.project_id === data.id))}
+				</p>
 			</div>
 			<div className="pc-separator"></div>
 			<div className="pc-bottom">
 				<div>
 					<AvatarGroup max={3}>
 						{members.map((m, i) => (
-							<UserIcon name={m} size={23} rounded />
+							<UserIcon
+								name={getByID(m, users).fullname}
+								size={23}
+								rounded
+							/>
 						))}
 					</AvatarGroup>
 				</div>
@@ -209,4 +223,5 @@ const Container = styled.div`
 	}
 `;
 
-export default ProjectCard;
+const mapStateToProps = ({ tasks }) => ({ tasks });
+export default connect(mapStateToProps, {})(ProjectCard);
