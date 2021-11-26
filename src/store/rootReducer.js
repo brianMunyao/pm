@@ -1,11 +1,14 @@
 import * as actions from './actionsTypes';
 const rootReducer = (state = {}, action) => {
     switch (action.type) {
-        case actions.USER_LOGIN:
-            return {...state };
+        // case actions.USER_LOGIN:
+        //     return {...state };
 
-        case actions.USER_SIGNUP:
-            return {...state };
+        // case actions.USER_SIGNUP:
+        //     return {...state };
+
+        case actions.DATA_FETCHED:
+            return {...state, ...action.payload, appLoaded: true };
 
         case actions.NAV_MINI:
             return {...state, navMini: true };
@@ -38,24 +41,23 @@ const rootReducer = (state = {}, action) => {
         case actions.PROJECT_CREATED:
             return {
                 ...state,
-                projects: [
-                    ...state.projects,
-                    {...action.payload, id: state.projects.length + 1 }, //!CHANGE THIS TO GET ID FROM DB
-                ],
+                projects: [...state.projects, action.payload],
             };
         case actions.PROJECT_UPDATED:
             return {
                 ...state,
                 projects: [
                     ...state.projects.map((p) =>
-                        p.id === action.payload.id ? action.payload : p
+                        p._id === action.payload._id ? action.payload : p
                     ),
                 ],
             };
         case actions.PROJECT_DELETED:
             return {
                 ...state,
-                projects: state.projects.filter((p) => p.id !== action.payload),
+                projects: state.projects.filter(
+                    (p) => p._id !== action.payload
+                ),
             };
 
         case actions.TASK_CREATED:
@@ -67,8 +69,7 @@ const rootReducer = (state = {}, action) => {
                         ...action.payload,
                         assigned: null, //!CHANGE THIS TO GET ASSIGN IN DB
                         tags: [],
-                        id: state.tasks.length + 1, //!CHANGE THIS TO GET ASSIGN IN DB
-                        due_date: null,
+                        _id: state.tasks.length + 21, //!CHANGE THIS TO GET ASSIGN IN DB
                     },
                 ],
             };
@@ -77,21 +78,21 @@ const rootReducer = (state = {}, action) => {
                 ...state,
                 tasks: [
                     ...state.tasks.map((t) =>
-                        t.id === action.payload.id ? action.payload : t
+                        t._id === action.payload._id ? action.payload : t
                     ),
                 ],
             };
         case actions.TASK_DELETED:
             return {
                 ...state,
-                tasks: state.tasks.filter((t) => t.id !== action.payload),
+                tasks: state.tasks.filter((t) => t._id !== action.payload),
             };
         case actions.MSG_SENT:
             return {
                 ...state,
                 chats: [
                     ...state.chats,
-                    {...action.payload, id: state.chats.length + 1 },
+                    {...action.payload, _id: state.chats.length + 1 },
                 ], //!CHANGE THIS TO GET ASSIGN IN DB
             };
 

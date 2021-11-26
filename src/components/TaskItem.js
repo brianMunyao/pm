@@ -303,7 +303,7 @@ const TaskItem = ({
 						}}>
 						<li
 							className="ti-setting-delete"
-							onClick={() => deleteTask(data.id)}>
+							onClick={() => deleteTask(data._id)}>
 							<IoTrashOutline /> Delete
 						</li>
 					</Menu>

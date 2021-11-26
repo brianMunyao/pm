@@ -1,3 +1,5 @@
+export const DATA_FETCHED = 'dataFetched';
+
 export const NAV_MINI = 'navMinimized';
 export const NAV_MAX = 'navMaximized';
 export const NAV_LOCK = 'navLocked';
@@ -24,5 +26,5 @@ export const TASK_DELETED = 'taskDeleted';
 
 export const MSG_SENT = 'msgSent';
 
-export const USER_LOGIN = 'userLogin';
-export const USER_SIGNUP = 'userSignUp';
+// export const USER_LOGIN = 'userLogin';
+// export const USER_SIGNUP = 'userSignUp';

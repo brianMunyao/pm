@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import moment from 'moment';
 import { connect } from 'react-redux';
 import { IoCalendarClearOutline } from 'react-icons/io5';
+import { useCookies } from 'react-cookie';
 
 import { closePModal, addProject, updateProject } from '../store/actions';
 import FormItem from './FormItem';
@@ -23,10 +24,12 @@ const ProjectModal = ({
 	updateProject,
 	closePModal,
 }) => {
+	const [cookies] = useCookies(['user']);
+
 	const [title, setTitle] = useState('');
 	const [type, setType] = useState('');
 	const [color, setColor] = useState(ourColors[0]);
-	const [due_date, setDue_date] = useState(null);
+	const [due_date, setDue_date] = useState(moment().add(1, 'months'));
 
 	const [titleError, setTitleError] = useState('');
 	const [typeError, setTypeError] = useState('');
@@ -34,7 +37,7 @@ const ProjectModal = ({
 	const [dateAnchor, setDateAnchor] = useState(null);
 	const [dPickerOpen, setDPickerOpen] = useState(false);
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
 		if (title === '' || type === '') {
 			setTitleError(title === '' ? 'Field cannot be empty' : '');
@@ -49,14 +52,12 @@ const ProjectModal = ({
 					due_date,
 				});
 			} else {
-				addProject({
+				await addProject({
 					title,
 					type,
 					due_date,
-					progress: '0%',
-					chats: 0,
 					color,
-					members: ['Def'],
+					created_by: cookies.user._id,
 				});
 			}
 			closePModal();

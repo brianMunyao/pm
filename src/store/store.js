@@ -5,6 +5,7 @@ import { chats, projects, tasks } from '../apis/data'; //!CHANGE THIS
 import rootReducer from './rootReducer';
 
 const initialState = {
+    appLoaded: false,
     openedProject: null,
     pModal: false,
     tModal: false,
@@ -12,7 +13,7 @@ const initialState = {
     navMini: false,
     navLock: false,
     tasks: [...tasks],
-    projects: [...projects],
+    projects: [],
     chats: [...chats],
 };
 

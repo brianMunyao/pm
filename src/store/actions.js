@@ -1,7 +1,11 @@
 import axios from 'axios';
 import * as actions from './actionsTypes';
 
+const proxy = (path) => `http://localhost:3001${path}`;
+
 //action creators
+const dataFetched = (payload) => ({ type: actions.DATA_FETCHED, payload });
+
 const navMinimized = () => ({
     type: actions.NAV_MINI,
 });
@@ -75,16 +79,25 @@ const msgSent = (payload) => ({
     payload,
 });
 
-const userSignedUp = (user) => ({
-    type: actions.USER_SIGNUP,
-    payload: user,
-});
-const userLoggedIn = (user) => ({
-    type: actions.USER_LOGIN,
-    payload: user,
-});
+// const userSignedUp = (user) => ({
+//     type: actions.USER_SIGNUP,
+//     payload: user,
+// });
+// const userLoggedIn = (user) => ({
+//     type: actions.USER_LOGIN,
+//     payload: user,
+// });
 
 // actions
+export const fetchData = () => async(dispatch) => {
+    const { data } = await axios.get(proxy('/projects'));
+
+    dispatch(
+        dataFetched({
+            projects: data.data,
+        })
+    );
+};
 export const minimizeNav = () => (dispatch) => {
     dispatch(navMinimized());
 };
@@ -128,14 +141,26 @@ export const closeProject = () => (dispatch) => {
     dispatch(navUnlocked());
 };
 
-export const addProject = (payload) => (dispatch) => {
-    dispatch(projectAdded(payload));
+export const addProject = (payload) => async(dispatch) => {
+    const { data } = await axios.post(proxy('/projects/add'), payload);
+
+    if (data.data) {
+        dispatch(projectAdded(data.data));
+    } else {
+        console.log(data);
+    }
 };
 export const updateProject = (payload) => (dispatch) => {
     dispatch(projectUpdated(payload));
 };
-export const deleteProject = (id) => (dispatch) => {
-    dispatch(projectDeleted(id));
+export const deleteProject = (id) => async(dispatch) => {
+    const { data } = await axios.delete(proxy(`/projects/${id}`));
+
+    if (data.data) {
+        dispatch(projectDeleted(id));
+    } else {
+        console.log(data);
+    }
 };
 
 export const addTask = (payload) => (dispatch) => {
@@ -153,19 +178,13 @@ export const sendMsg = (payload) => (dispatch) => {
 };
 
 export const loginUser = async(user) => {
-    const { data } = await axios.post(
-        'http://localhost:3001/users/login',
-        user
-    );
+    const { data } = await axios.post(proxy('/users/login'), user);
 
     return data;
 };
 
 export const signUpUser = async(user) => {
-    const { data } = await axios.post(
-        'http://localhost:3001/users/register',
-        user
-    );
+    const { data } = await axios.post(proxy('/users/register'), user);
 
     return data;
 };

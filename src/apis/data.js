@@ -41,7 +41,7 @@ export const projects = [{
 ];
 
 export const tasks = [{
-        id: 1,
+        _id: 1,
         title: 'Make site responsive',
         status: 0,
         due_date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
@@ -49,17 +49,17 @@ export const tasks = [{
         assigned: null,
         tags: [],
 
-        start: new Date(2020, 1, 2),
-        end: new Date(2020, 1, 2),
-        name: 'Antoh',
+        // start: new Date(2020, 1, 2),
+        // end: new Date(2020, 1, 2),
+        // name: 'Antoh',
         type: 'task',
 
         start_date: 'Thu Oct 23 2021 14:17:23 GMT+0300',
         duration: 2,
-        text: 'Some text',
+        // text: 'Some text',
     },
     {
-        id: 2,
+        _id: 2,
         title: 'Creating a responsive version of the site',
         status: 1,
         due_date: 'Thu Oct 22 2021 14:17:23 GMT+0300',
@@ -67,17 +67,17 @@ export const tasks = [{
         assigned: null,
         tags: [],
 
-        start: new Date(2020, 1, 2),
-        end: new Date(2020, 1, 2),
-        name: 'Antoh',
+        // start: new Date(2020, 1, 2),
+        // end: new Date(2020, 1, 2),
+        // name: 'Antoh',
         type: 'task',
 
         start_date: 'Thu Oct 24 2021 14:17:23 GMT+0300',
         duration: 2,
-        text: 'Some text',
+        // text: 'Some text',
     },
     {
-        id: 4,
+        _id: 4,
         title: 'todo3',
         status: 2,
         due_date: 'Thu Oct 27 2021 14:17:23 GMT+0300',
@@ -85,17 +85,17 @@ export const tasks = [{
         assigned: null,
         tags: [],
 
-        start: new Date(2020, 1, 2),
-        end: new Date(2020, 1, 2),
-        name: 'Antoh',
+        // start: new Date(2020, 1, 2),
+        // end: new Date(2020, 1, 2),
+        // name: 'Antoh',
         type: 'task',
 
         start_date: 'Thu Oct 28 2021 14:17:23 GMT+0300',
         duration: 2,
-        text: 'Some text',
+        // text: 'Some text',
     },
     {
-        id: 5,
+        _id: 5,
         title: 'todo3',
         status: 2,
         due_date: 'Thu Oct 29 2021 14:17:23 GMT+0300',
@@ -103,17 +103,17 @@ export const tasks = [{
         assigned: null,
         tags: [],
 
-        start: new Date(2020, 1, 2),
-        end: new Date(2020, 1, 2),
-        name: 'Antoh',
+        // start: new Date(2020, 1, 2),
+        // end: new Date(2020, 1, 2),
+        // name: 'Antoh',
         type: 'task',
 
         start_date: 'Thu Oct 30 2021 14:17:23 GMT+0300',
         duration: 2,
-        text: 'Some text',
+        // text: 'Some text',
     },
     {
-        id: 6,
+        _id: 6,
         title: 'todo3',
         status: 2,
         due_date: 'Thu Oct 23 2021 14:17:23 GMT+0300',
@@ -121,14 +121,14 @@ export const tasks = [{
         assigned: null,
         tags: [],
 
-        start: new Date(2020, 1, 2),
-        end: new Date(2020, 1, 2),
-        name: 'Antoh',
+        // start: new Date(2020, 1, 2),
+        // end: new Date(2020, 1, 2),
+        // name: 'Antoh',
         type: 'task',
 
         start_date: 'Thu Oct 31 2021 14:17:23 GMT+0300',
         duration: 2,
-        text: 'Some text',
+        // text: 'Some text',
     },
 ];
 

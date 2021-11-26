@@ -113,12 +113,14 @@ const ProjectCard = ({
 				<p className="pc-progress-title">Progress</p>
 				<ProgressBar
 					width={getProgress(
-						tasks.filter((t) => t.project_id === data.id)
+						tasks.filter((t) => t.project_id === data._id)
 					)}
 					color={getColor(color)}
 				/>
 				<p className="pc-progress-pge">
-					{getProgress(tasks.filter((t) => t.project_id === data.id))}
+					{getProgress(
+						tasks.filter((t) => t.project_id === data._id)
+					)}
 				</p>
 			</div>
 			<div className="pc-separator"></div>
@@ -127,7 +129,8 @@ const ProjectCard = ({
 					<AvatarGroup max={3}>
 						{members.map((m, i) => (
 							<UserIcon
-								name={getByID(m, users).fullname}
+								name={m}
+								// name={getByID(m, users).fullname} //!EDIT THIS
 								size={23}
 								rounded
 							/>

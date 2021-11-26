@@ -14,13 +14,19 @@ import { useCookies } from 'react-cookie';
 import Logo from '../components/Logo';
 import colors from '../config/colors';
 import ProjectsTab from './ProjectsTab';
-import { maximizeNav, minimizeNav, closeProject } from '../store/actions';
+import {
+	maximizeNav,
+	minimizeNav,
+	closeProject,
+	fetchData,
+} from '../store/actions';
 import ProjectModal from '../components/ProjectModal';
 import InboxTab from './InboxTab';
 import AppToolTip from '../components/AppToolTip';
 import DashTab from './DashTab';
 import { isLoggedIn } from '../apis/users';
 import SettingsTab from './SettingsTab';
+import Loader from '../components/Loader';
 
 const navs = [
 	{ title: 'Dashboard', Icon: IoGridOutline, to: '/m' },
@@ -30,6 +36,8 @@ const navs = [
 ];
 
 const MainScreen = ({
+	appLoaded,
+	fetchData,
 	navMini,
 	navLock,
 	openedProject,
@@ -109,9 +117,12 @@ const MainScreen = ({
 		getWidth();
 		setActiveNav(navs.findIndex(({ to }) => to === location.pathname));
 		window.addEventListener('resize', getWidth);
-	}, [location, getWidth]);
+		if (!appLoaded) fetchData();
+	}, [location, getWidth, appLoaded, fetchData]);
 
 	if (!isLoggedIn(cookies)) return <Redirect to="/login" />;
+
+	if (!appLoaded) return <Loader />;
 
 	return (
 		<Main navMini={navMini}>
@@ -236,14 +247,16 @@ const Main = styled.div`
 	}
 `;
 
-const mapStateToProps = ({ navMini, navLock, openedProject }) => ({
+const mapStateToProps = ({ navMini, navLock, openedProject, appLoaded }) => ({
 	navMini,
 	navLock,
 	openedProject,
+	appLoaded,
 });
 
 export default connect(mapStateToProps, {
 	minimizeNav,
 	maximizeNav,
 	closeProject,
+	fetchData,
 })(MainScreen);

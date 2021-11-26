@@ -174,7 +174,7 @@ const GanttData = [
 ];
 
 const taskFields = {
-	id: 'id',
+	id: '_id',
 	name: 'title',
 	startDate: 'start_date',
 	duration: 'duration',
@@ -187,7 +187,7 @@ const AppGantt = ({ tasks }) => {
 		const cols = document.getElementsByTagName('colgroup');
 		console.log([...cols][0]);
 		[...cols].slice(0, 1).forEach((elem, i) => {
-			elem.pop();
+			// elem.pop();
 		});
 	}, []);
 

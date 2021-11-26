@@ -91,9 +91,9 @@ const ProjectsTab = ({
 
 	const toggleChat = () => setChatOpen(!chatOpen);
 
-	const getProject = (id) => projects.filter((item) => item.id === id)[0];
+	const getProject = (id) => projects.filter((item) => item._id === id)[0];
 
-	const getTaskByID = (id) => tasks.filter((t) => t.id === id)[0];
+	const getTaskByID = (id) => tasks.filter((t) => t._id === id)[0];
 
 	const handleOpenProject = (id) => openProject(id);
 	const handleCloseProject = () => closeProject();
@@ -144,9 +144,9 @@ const ProjectsTab = ({
 					{list.length > 0 ? (
 						list.map((t, i) => (
 							<Draggable
-								key={t.id}
+								key={t._id}
 								index={i}
-								draggableId={t.id.toString()}>
+								draggableId={t._id.toString()}>
 								{(p, s) => (
 									<div
 										ref={p.innerRef}
@@ -175,6 +175,12 @@ const ProjectsTab = ({
 								title: 'new task',
 								status: Number(id),
 								project_id: openedProject,
+								start_date: moment().toLocaleString(),
+								due_date: moment()
+									.add(7, 'days')
+									.toLocaleString(),
+								duration: 7,
+								type: 'task',
 							});
 						}}>
 						<IoAddCircleOutline /> Add
@@ -437,10 +443,10 @@ const ProjectsTab = ({
 						<ProjectCard
 							data={p}
 							key={i}
-							onClick={() => handleOpenProject(p.id)}
+							onClick={() => handleOpenProject(p._id)}
 							openUpdate={() => openPEdit(p)}
 							closeUpdate={closePEdit}
-							deleteProject={() => deleteProject(p.id)}
+							deleteProject={() => deleteProject(p._id)}
 						/>
 					))}
 				</div>
@@ -637,6 +643,7 @@ const Container = styled.div`
 		padding: 10px 15px;
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+		grid-auto-rows: min-content;
 		gap: 20px;
 		height: 100%;
 		overflow-y: auto;

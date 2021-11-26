@@ -90,7 +90,7 @@ const DashTab = ({ projects, tasks }) => {
 							<ProjectCardAlt
 								data={p}
 								key={p.id}
-								onClick={() => goToProject(p.id)}
+								onClick={() => goToProject(p._id)}
 							/>
 						))}
 					</div>

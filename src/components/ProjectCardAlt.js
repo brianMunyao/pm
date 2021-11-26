@@ -4,7 +4,13 @@ import { IoChatbubbleEllipsesOutline } from 'react-icons/io5';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 
-import { getByID, getColor, getLightColor, getProgress } from '../apis/funcs';
+import {
+	addEllipsis,
+	getByID,
+	getColor,
+	getLightColor,
+	getProgress,
+} from '../apis/funcs';
 import colors from '../config/colors';
 import ProgressBar from './ProgressBar';
 import UserIcon from './UserIcon';
@@ -22,7 +28,8 @@ const ProjectCardAlt = ({ tasks, data, onClick }) => {
 						<UserIcon
 							rounded
 							key={i}
-							name={getByID(m, users).fullname}
+							name={m}
+							// name={getByID(m, users).fullname} //!EDIT THIS
 							size={25}
 						/>
 					))}
@@ -31,7 +38,8 @@ const ProjectCardAlt = ({ tasks, data, onClick }) => {
 			</div>
 
 			<div className="pca-info">
-				<p className="pca-title">{title}</p>
+				<p className="pca-title">{addEllipsis(17, title)}</p>
+				{/* <p className="pca-title">{}</p> */}
 				<p className="pca-type">{type}</p>
 			</div>
 

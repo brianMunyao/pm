@@ -34,6 +34,10 @@ export const getByID = (id = 0, list = []) => {
     return list.filter((l) => l.id === id)[0] || null;
 };
 
+export const addEllipsis = (num, word) => {
+    return word.length > num ? word.substring(0, num - 2) + '..' : word;
+};
+
 export const filterByDate = (arr, mode, date) => {
     if (mode === 'none') return arr;
 
