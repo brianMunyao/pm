@@ -10,6 +10,7 @@ import {
 	IoPaperPlaneOutline,
 	IoReorderFour,
 } from 'react-icons/io5';
+import { BsBarChartSteps } from 'react-icons/bs';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import axios from 'axios';
@@ -18,6 +19,7 @@ import { useHistory, useLocation } from 'react-router';
 
 import ProjectCard from '../components/ProjectCard';
 import TaskItem from '../components/TaskItem';
+import AppGantt from '../components/AppGantt';
 import RadioGroup from '../components/RadioGroup';
 import colors from '../config/colors';
 import {
@@ -101,7 +103,7 @@ const ProjectsTab = ({
 			const elem = await document.querySelector('.pt-chats');
 			elem.scrollTop = elem.scrollHeight;
 		}
-	}, [chats]);
+	}, [chats, openedProject]);
 
 	useEffect(() => {
 		// socket.on('chat', (res) => {
@@ -180,6 +182,43 @@ const ProjectsTab = ({
 				</div>
 			)}
 		</Droppable>
+	);
+
+	const SideChat = () => (
+		<div className="pt-side-chat">
+			<p className="pt-chat-title">Group Chat</p>
+			<div className="pt-chats">
+				{chats.map((c, i) => (
+					<Chat me={c.name === 'me'} key={i}>
+						{/** //! CHANGE THIS TO USERID */}
+						<div className="pt-chat-inner">
+							{c.name !== 'me' && (
+								<span className="pt-chat-name">{c.name}</span>
+							)}
+							<span className="pt-chat-text">{c.text}</span>
+							<span className="pt-chat-date">
+								{moment(c.date).format('HH:MM')}
+							</span>
+						</div>
+					</Chat>
+				))}
+			</div>
+
+			<div className="pt-chats-input">
+				<input
+					autoFocus
+					type="text"
+					placeholder="Enter a message"
+					value={msg}
+					onChange={(e) => setMsg(e.target.value)}
+					onKeyPress={(e) => e.key === 'Enter' && handleMsg()}
+				/>
+
+				<span className="pt-chats-send fja" onClick={handleMsg}>
+					<IoPaperPlaneOutline />
+				</span>
+			</div>
+		</div>
 	);
 
 	const move = (
@@ -301,7 +340,13 @@ const ProjectsTab = ({
 						</h2>
 						<div>
 							<RadioGroup
+								defaultValue={1}
 								data={[
+									{
+										icon: <BsBarChartSteps />,
+										value: 'gantt',
+										label: 'Gantt Chart',
+									},
 									{
 										icon: <IoGridOutline />,
 										value: 'grid',
@@ -336,84 +381,55 @@ const ProjectsTab = ({
 
 			{openedProject ? (
 				<div className="pt-open-con">
-					<DragDropContext onDragEnd={onDragEnd}>
-						<div
-							className={`pt-open ${
-								listStyle === 'list'
-									? 'pt-list-view'
-									: 'pt-kanban-view'
-							}`}>
-							<div className="pt-backlog">
-								<div className="pt-todos-title">
-									Backlog ({backlog.length})
-								</div>
-								<DnD list={backlog} id="0" lStyle={listStyle} />
-							</div>
-							<div className="pt-inprogress">
-								<div className="pt-todos-title">
-									In Progress ({inprogress.length})
-								</div>
-								<DnD
-									list={inprogress}
-									id="1"
-									lStyle={listStyle}
-								/>
-							</div>
-							<div className="pt-complete">
-								<div className="pt-todos-title">
-									Complete ({completed.length})
-								</div>
-								<DnD
-									list={completed}
-									id="2"
-									lStyle={listStyle}
-								/>
-							</div>
-						</div>
-					</DragDropContext>
-
-					<div className="pt-side-chat">
-						<p className="pt-chat-title">Group Chat</p>
-						<div className="pt-chats">
-							{chats.map((c, i) => (
-								<Chat me={c.name === 'me'} key={i}>
-									{/** //! CHANGE THIS TO USERID */}
-									<div className="pt-chat-inner">
-										{c.name !== 'me' && (
-											<span className="pt-chat-name">
-												{c.name}
-											</span>
-										)}
-										<span className="pt-chat-text">
-											{c.text}
-										</span>
-										<span className="pt-chat-date">
-											{moment(c.date).format('HH:MM')}
-										</span>
+					{listStyle === 'gantt' ? (
+						<AppGantt
+							tasks={tasks.filter(
+								(t) => t.project_id === openedProject
+							)}
+						/>
+					) : (
+						<DragDropContext onDragEnd={onDragEnd}>
+							<div
+								className={`pt-open ${
+									listStyle === 'list'
+										? 'pt-list-view'
+										: 'pt-kanban-view'
+								}`}>
+								<div className="pt-backlog">
+									<div className="pt-todos-title">
+										Backlog ({backlog.length})
 									</div>
-								</Chat>
-							))}
-						</div>
+									<DnD
+										list={backlog}
+										id="0"
+										lStyle={listStyle}
+									/>
+								</div>
+								<div className="pt-inprogress">
+									<div className="pt-todos-title">
+										In Progress ({inprogress.length})
+									</div>
+									<DnD
+										list={inprogress}
+										id="1"
+										lStyle={listStyle}
+									/>
+								</div>
+								<div className="pt-complete">
+									<div className="pt-todos-title">
+										Complete ({completed.length})
+									</div>
+									<DnD
+										list={completed}
+										id="2"
+										lStyle={listStyle}
+									/>
+								</div>
+							</div>
+						</DragDropContext>
+					)}
 
-						<div className="pt-chats-input">
-							<input
-								autoFocus
-								type="text"
-								placeholder="Enter a message"
-								value={msg}
-								onChange={(e) => setMsg(e.target.value)}
-								onKeyPress={(e) =>
-									e.key === 'Enter' && handleMsg()
-								}
-							/>
-
-							<span
-								className="pt-chats-send fja"
-								onClick={handleMsg}>
-								<IoPaperPlaneOutline />
-							</span>
-						</div>
-					</div>
+					<SideChat />
 				</div>
 			) : (
 				<div className="pt-list">

@@ -1,6 +1,5 @@
 import moment from 'moment';
 import colors from '../config/colors';
-import { projects } from './data';
 
 export const getColor = (color) => colors[color];
 export const getLightColor = (color) => colors[`${color}Light`];

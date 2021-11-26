@@ -1,6 +1,12 @@
 import * as actions from './actionsTypes';
 const rootReducer = (state = {}, action) => {
     switch (action.type) {
+        case actions.USER_LOGIN:
+            return {...state };
+
+        case actions.USER_SIGNUP:
+            return {...state };
+
         case actions.NAV_MINI:
             return {...state, navMini: true };
         case actions.NAV_MAX:
@@ -14,6 +20,10 @@ const rootReducer = (state = {}, action) => {
             return {...state, pModal: true };
         case actions.P_MODAL_CLOSED:
             return {...state, pModal: false };
+        case actions.T_MODAL_OPENED:
+            return {...state, tModal: true };
+        case actions.T_MODAL_CLOSED:
+            return {...state, tModal: false };
 
         case actions.P_EDIT_OPENED:
             return {...state, pEdit: action.payload };

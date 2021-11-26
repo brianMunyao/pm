@@ -4,8 +4,8 @@ import styled from 'styled-components';
 import colors from '../config/colors';
 import AppToolTip from './AppToolTip';
 
-const RadioGroup = ({ data = [], onChange }) => {
-	const [active, setActive] = useState(0);
+const RadioGroup = ({ defaultValue = 0, data = [], onChange }) => {
+	const [active, setActive] = useState(defaultValue);
 	const handleChange = (index, val) => {
 		setActive(index);
 		onChange(val);

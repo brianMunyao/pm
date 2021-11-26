@@ -21,6 +21,12 @@ const pModalOpened = () => ({
 const pModalClosed = () => ({
     type: actions.P_MODAL_CLOSED,
 });
+const tModalOpened = () => ({
+    type: actions.T_MODAL_OPENED,
+});
+const tModalClosed = () => ({
+    type: actions.T_MODAL_CLOSED,
+});
 
 const pEditOpened = (payload) => ({
     type: actions.P_EDIT_OPENED,
@@ -69,6 +75,15 @@ const msgSent = (payload) => ({
     payload,
 });
 
+const userSignedUp = (user) => ({
+    type: actions.USER_SIGNUP,
+    payload: user,
+});
+const userLoggedIn = (user) => ({
+    type: actions.USER_LOGIN,
+    payload: user,
+});
+
 // actions
 export const minimizeNav = () => (dispatch) => {
     dispatch(navMinimized());
@@ -88,6 +103,12 @@ export const openPModal = () => (dispatch) => {
 };
 export const closePModal = () => (dispatch) => {
     dispatch(pModalClosed());
+};
+export const openTModal = () => (dispatch) => {
+    dispatch(tModalOpened());
+};
+export const closeTModal = () => (dispatch) => {
+    dispatch(tModalClosed());
 };
 
 export const openPEdit = (payload) => (dispatch) => {
@@ -129,4 +150,22 @@ export const deleteTask = (id) => (dispatch) => {
 
 export const sendMsg = (payload) => (dispatch) => {
     dispatch(msgSent(payload));
+};
+
+export const loginUser = async(user) => {
+    const { data } = await axios.post(
+        'http://localhost:3001/users/login',
+        user
+    );
+
+    return data;
+};
+
+export const signUpUser = async(user) => {
+    const { data } = await axios.post(
+        'http://localhost:3001/users/register',
+        user
+    );
+
+    return data;
 };

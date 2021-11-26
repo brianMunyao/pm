@@ -6,6 +6,7 @@ export const projects = [{
         color: 'purple',
         members: [3],
         due_date: 'Thu Oct 1 2021 14:17:23 GMT+0300',
+        tags: [],
     },
     {
         id: 2,
@@ -15,6 +16,7 @@ export const projects = [{
         color: 'orange',
         members: [1, 2, 3],
         due_date: 'Thu Oct 2 2021 14:17:23 GMT+0300',
+        tags: [],
     },
     {
         id: 3,
@@ -24,6 +26,7 @@ export const projects = [{
         color: 'deepOrange',
         members: [1, 2],
         due_date: 'Thu Oct 21 2021 14:17:23 GMT+0300',
+        tags: [],
     },
     {
         id: 4,
@@ -33,6 +36,7 @@ export const projects = [{
         color: 'brown',
         members: [2, 7, 8, 3],
         due_date: 'Thu Oct 19 2021 14:17:23 GMT+0300',
+        tags: [],
     },
 ];
 
@@ -44,6 +48,15 @@ export const tasks = [{
         project_id: 2,
         assigned: null,
         tags: [],
+
+        start: new Date(2020, 1, 2),
+        end: new Date(2020, 1, 2),
+        name: 'Antoh',
+        type: 'task',
+
+        start_date: 'Thu Oct 23 2021 14:17:23 GMT+0300',
+        duration: 2,
+        text: 'Some text',
     },
     {
         id: 2,
@@ -53,51 +66,69 @@ export const tasks = [{
         project_id: 2,
         assigned: null,
         tags: [],
+
+        start: new Date(2020, 1, 2),
+        end: new Date(2020, 1, 2),
+        name: 'Antoh',
+        type: 'task',
+
+        start_date: 'Thu Oct 24 2021 14:17:23 GMT+0300',
+        duration: 2,
+        text: 'Some text',
     },
     {
-        id: 3,
+        id: 4,
+        title: 'todo3',
+        status: 2,
+        due_date: 'Thu Oct 27 2021 14:17:23 GMT+0300',
+        project_id: 2,
+        assigned: null,
+        tags: [],
+
+        start: new Date(2020, 1, 2),
+        end: new Date(2020, 1, 2),
+        name: 'Antoh',
+        type: 'task',
+
+        start_date: 'Thu Oct 28 2021 14:17:23 GMT+0300',
+        duration: 2,
+        text: 'Some text',
+    },
+    {
+        id: 5,
+        title: 'todo3',
+        status: 2,
+        due_date: 'Thu Oct 29 2021 14:17:23 GMT+0300',
+        project_id: 2,
+        assigned: null,
+        tags: [],
+
+        start: new Date(2020, 1, 2),
+        end: new Date(2020, 1, 2),
+        name: 'Antoh',
+        type: 'task',
+
+        start_date: 'Thu Oct 30 2021 14:17:23 GMT+0300',
+        duration: 2,
+        text: 'Some text',
+    },
+    {
+        id: 6,
         title: 'todo3',
         status: 2,
         due_date: 'Thu Oct 23 2021 14:17:23 GMT+0300',
         project_id: 2,
         assigned: null,
         tags: [],
-    },
-    {
-        id: 4,
-        title: 'todo 4',
-        status: 0,
-        due_date: 'Thu Oct 25 2021 14:17:23 GMT+0300',
-        project_id: 3,
-        assigned: null,
-        tags: [],
-    },
-    {
-        id: 4,
-        title: 'todo 4',
-        status: 0,
-        due_date: 'Thu Oct 25 2021 14:17:23 GMT+0300',
-        project_id: 3,
-        assigned: null,
-        tags: [],
-    },
-    {
-        id: 43,
-        title: 'todo 3',
-        status: 0,
-        due_date: 'Thu Oct 25 2021 14:17:23 GMT+0300',
-        project_id: 3,
-        assigned: null,
-        tags: [],
-    },
-    {
-        id: 41,
-        title: 'todo 423',
-        status: 2,
-        due_date: 'Thu Oct 25 2021 14:17:23 GMT+0300',
-        project_id: 3,
-        assigned: null,
-        tags: [],
+
+        start: new Date(2020, 1, 2),
+        end: new Date(2020, 1, 2),
+        name: 'Antoh',
+        type: 'task',
+
+        start_date: 'Thu Oct 31 2021 14:17:23 GMT+0300',
+        duration: 2,
+        text: 'Some text',
     },
 ];
 

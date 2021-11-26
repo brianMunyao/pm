@@ -8,6 +8,7 @@ import { IoLockClosed, IoPerson } from 'react-icons/io5';
 import { isLoggedIn } from '../apis/users';
 import FormItem from '../components/FormItem';
 import FormContainer from './FormContainer';
+import { loginUser } from '../store/actions';
 
 const LoginScreen = () => {
 	const [formError, setFormError] = useState('');
@@ -27,17 +28,13 @@ const LoginScreen = () => {
 			setSubmitting(true);
 			setFormError('');
 			try {
-				setCookie('user', values);
-				// const res = await loginUser({
-				// 	...values,
-				// 	password: encrypt(values.password),
-				// });
-				// if (res.data) {
-				// 	setCookie('user', res.data);
-				// } else {
-				// 	setFormError(res.error);
-				// 	setSubmitting(false);
-				// }
+				const res = await loginUser(values);
+				if (res.data) {
+					setCookie('user', res.data);
+				} else {
+					setFormError(res.error);
+					setSubmitting(false);
+				}
 			} catch (e) {
 				setFormError('Submittion error.');
 				setSubmitting(false);
