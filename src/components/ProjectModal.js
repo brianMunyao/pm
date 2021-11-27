@@ -16,6 +16,7 @@ import {
 	ourColors,
 	projectTypes,
 } from '../apis/funcs';
+import AppToolTip from '../components/AppToolTip';
 
 const ProjectModal = ({
 	pEdit,
@@ -29,7 +30,7 @@ const ProjectModal = ({
 	const [title, setTitle] = useState('');
 	const [type, setType] = useState('');
 	const [color, setColor] = useState(ourColors[0]);
-	const [due_date, setDue_date] = useState(moment().add(1, 'months'));
+	const [due_date, setDue_date] = useState(moment().add(1, 'month'));
 
 	const [titleError, setTitleError] = useState('');
 	const [typeError, setTypeError] = useState('');
@@ -67,7 +68,7 @@ const ProjectModal = ({
 	useEffect(() => {
 		setTitle(pEdit ? pEdit.title : '');
 		setType(pEdit ? pEdit.type : '');
-		setDue_date(pEdit ? pEdit.due_date : '');
+		setDue_date(pEdit ? pEdit.due_date : moment().add(1, 'month'));
 		setColor(pEdit ? pEdit.color : ourColors[0]);
 	}, [pEdit]);
 
@@ -119,16 +120,20 @@ const ProjectModal = ({
 							/>
 						</LocalizationProvider>
 
-						<span
-							className="ti-due"
+						<div
+							className="pm-due"
 							onClick={(e) => {
 								setDateAnchor(e.currentTarget);
 								setDPickerOpen(true);
 							}}>
-							<IoCalendarClearOutline />
-							{due_date &&
-								` ${moment(due_date).format('MMM DD')}`}
-						</span>
+							<AppToolTip title="Due date" placement="top">
+								<span>
+									<IoCalendarClearOutline />
+									{due_date &&
+										` ${moment(due_date).format('MMM DD')}`}
+								</span>
+							</AppToolTip>
+						</div>
 
 						<div className="pm-colors">
 							{ourColors.map((c, i) => (
@@ -167,6 +172,11 @@ const Container = styled.div`
 		pointer-events: all;
 		h3 {
 			padding: 0 0 10px;
+		}
+		.pm-due {
+			padding: 5px;
+			width: fit-content;
+			margin: 0 0 10px;
 		}
 		.pm-colors {
 			display: flex;

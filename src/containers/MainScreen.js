@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import {
+	IoAdd,
 	IoChatbubbleEllipsesOutline,
 	IoFileTrayFullOutline,
 	IoGridOutline,
@@ -19,6 +20,7 @@ import {
 	minimizeNav,
 	closeProject,
 	fetchData,
+	openPModal,
 } from '../store/actions';
 import ProjectModal from '../components/ProjectModal';
 import InboxTab from './InboxTab';
@@ -44,6 +46,7 @@ const MainScreen = ({
 	maximizeNav,
 	minimizeNav,
 	closeProject,
+	openPModal,
 }) => {
 	const [activeNav, setActiveNav] = useState(0);
 	const [cookies, removeCookie] = useCookies(['user']);
@@ -55,19 +58,20 @@ const MainScreen = ({
 		}
 	};
 
-	const NavItem = ({ id, data: { title, Icon, to }, onClick }) => {
-		if (onClick) {
+	const NavItem = ({ id, data: { title, Icon, to }, onClick, _class }) => {
+		if (_class) {
+			const c = `nav-item ${_class}`;
 			return (
 				<div>
 					{navMini ? (
 						<AppToolTip title={title}>
-							<div className="nav-item logout" onClick={onClick}>
+							<div className={c} onClick={onClick}>
 								<Icon />
 								<span>{title}</span>
 							</div>
 						</AppToolTip>
 					) : (
-						<div className="nav-item logout" onClick={onClick}>
+						<div className={c} onClick={onClick}>
 							<Icon />
 							<span>{title}</span>
 						</div>
@@ -130,6 +134,12 @@ const MainScreen = ({
 				<div>
 					<Logo size={35} align="center" />
 
+					<NavItem
+						_class="add-project"
+						data={{ Icon: IoAdd, title: 'Create Project' }}
+						onClick={openPModal}
+					/>
+
 					{navs.map((n, i) => (
 						<NavItem id={i} data={n} key={i} />
 					))}
@@ -137,6 +147,7 @@ const MainScreen = ({
 
 				<div className="nav-logout">
 					<NavItem
+						_class="logout"
 						data={{ Icon: IoPower, title: 'Logout' }}
 						onClick={logout}
 					/>
@@ -235,6 +246,15 @@ const Main = styled.div`
 				background: ${colors.error};
 			}
 		}
+		.nav-item.add-project {
+			margin-bottom: 30px;
+			background: ${colors.secondaryLight};
+			color: ${colors.secondaryGreen};
+			&:hover {
+				color: white;
+				background: ${colors.secondaryBlue};
+			}
+		}
 
 		.logo {
 			margin: ${({ navMini }) => (navMini ? '10px 0 20px' : '10px 0')};
@@ -259,4 +279,5 @@ export default connect(mapStateToProps, {
 	maximizeNav,
 	closeProject,
 	fetchData,
+	openPModal,
 })(MainScreen);
