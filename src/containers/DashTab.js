@@ -8,14 +8,16 @@ import { connect } from 'react-redux';
 import { useHistory } from 'react-router';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
+import { IoAddOutline } from 'react-icons/io5';
 
 import colors from '../config/colors';
 import { getColor, getDatedTransactions, getLightColor } from '../apis/funcs';
 import empty from '../assets/empty.png';
 import ProjectCardAlt from '../components/ProjectCardAlt';
 import TaskItem from '../components/TaskItem';
+import { openPModal } from '../store/actions';
 
-const DashTab = ({ projects, tasks }) => {
+const DashTab = ({ projects, tasks, openPModal }) => {
 	const [dateValue, setDateValue] = useState(moment());
 
 	const [projectsDue, setProjectsDue] = useState([]);
@@ -78,47 +80,62 @@ const DashTab = ({ projects, tasks }) => {
 					</p>
 				</div>
 
-				<div className="dt-projects">
-					<div className="dt-projects-title">
-						<span className="dt-pt-left">Recent projects</span>
-						<Link to="/m/projects">
-							<span className="dt-pt-right">View all</span>
-						</Link>
-					</div>
-					<div className="dt-projects-list">
-						{projects.map((p) => (
-							<ProjectCardAlt
-								data={p}
-								key={p.id}
-								onClick={() => goToProject(p._id)}
-							/>
-						))}
-					</div>
-				</div>
-
-				<div className="dt-bottom">
-					<div className="dt-mytasks">
-						<p className="dt-mytasks-title">My Upcoming Tasks</p>
-						{tasks.length > 0 ? (
-							tasks
-								.slice(0, 4)
-								.map((t, i) => (
-									<TaskItem
-										data={t}
-										key={i}
-										listStyle="list"
-										quickView
-										onClick={() =>
-											goToProject(t.project_id)
-										}
+				{projects.length > 0 ? (
+					<>
+						<div className="dt-projects">
+							<div className="dt-projects-title">
+								<span className="dt-pt-left">
+									Recent projects
+								</span>
+								<Link to="/m/projects">
+									<span className="dt-pt-right">
+										View all
+									</span>
+								</Link>
+							</div>
+							<div className="dt-projects-list">
+								{projects.map((p) => (
+									<ProjectCardAlt
+										data={p}
+										key={p.id}
+										onClick={() => goToProject(p._id)}
 									/>
-								))
-						) : (
-							<TaskItem empty />
-						)}
+								))}
+							</div>
+						</div>
+
+						<div className="dt-bottom">
+							<div className="dt-mytasks">
+								<p className="dt-mytasks-title">
+									My Upcoming Tasks
+								</p>
+								{tasks.length > 0 ? (
+									tasks
+										.slice(0, 4)
+										.map((t, i) => (
+											<TaskItem
+												data={t}
+												key={i}
+												listStyle="list"
+												quickView
+												onClick={() =>
+													goToProject(t.project_id)
+												}
+											/>
+										))
+								) : (
+									<TaskItem empty />
+								)}
+							</div>
+							<div className="dt-some">sdj</div>
+						</div>
+					</>
+				) : (
+					<div className="dt-empty-alt fja" onClick={openPModal}>
+						<IoAddOutline />
+						<p>Add Your First Project</p>
 					</div>
-					<div className="dt-some">sdj</div>
-				</div>
+				)}
 			</div>
 
 			<div className="dt-side">
@@ -245,6 +262,24 @@ const Container = styled.div`
 				}
 			}
 		}
+		.dt-empty-alt {
+			flex-direction: column;
+			/* flex: 1; */
+			height: 150px;
+			opacity: 0.5;
+			border: 1.5px dashed #69696996;
+			margin: 10px;
+			border-radius: 10px;
+			cursor: pointer;
+			transition: all.2s linear;
+			padding: 10px;
+			&:hover {
+				background: #eeeeee;
+			}
+			svg {
+				font-size: 30px;
+			}
+		}
 	}
 
 	.dt-side {
@@ -346,4 +381,4 @@ const SItem = styled.div`
 `;
 
 const mapStateToProps = ({ projects, tasks }) => ({ projects, tasks });
-export default connect(mapStateToProps, {})(DashTab);
+export default connect(mapStateToProps, { openPModal })(DashTab);

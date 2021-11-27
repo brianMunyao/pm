@@ -33,6 +33,7 @@ import {
 	updateTask,
 	sendMsg,
 } from '../store/actions';
+import empty from '../assets/empty.png';
 
 const socket = ioClient.connect('http://localhost:8000');
 
@@ -437,7 +438,7 @@ const ProjectsTab = ({
 
 					<SideChat />
 				</div>
-			) : (
+			) : projects.length > 0 ? (
 				<div className="pt-list">
 					{projects.map((p, i) => (
 						<ProjectCard
@@ -449,6 +450,11 @@ const ProjectsTab = ({
 							deleteProject={() => deleteProject(p._id)}
 						/>
 					))}
+				</div>
+			) : (
+				<div className="pt-empty fja" onClick={openPModal}>
+					<img src={empty} alt="empty" />
+					<p>No projects added</p>
 				</div>
 			)}
 		</Container>
@@ -647,6 +653,22 @@ const Container = styled.div`
 		gap: 20px;
 		height: 100%;
 		overflow-y: auto;
+	}
+	.pt-empty {
+		flex: 1;
+		flex-direction: column;
+		opacity: 0.5;
+		border: 1.5px dashed #69696996;
+		margin: 10px;
+		border-radius: 10px;
+		cursor: pointer;
+		transition: all.2s linear;
+		&:hover {
+			background: #eeeeee;
+		}
+		img {
+			height: 80px;
+		}
 	}
 
 	@media (max-width: 850px) {
