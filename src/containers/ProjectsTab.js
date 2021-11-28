@@ -37,6 +37,7 @@ import {
 } from '../store/actions';
 import empty from '../assets/empty.png';
 import AppToolTip from '../components/AppToolTip';
+import AddMemberModal from '../components/AddMemberModal';
 import UserIcon from '../components/UserIcon';
 import { getColor, getLightColor } from '../apis/funcs';
 
@@ -67,6 +68,10 @@ const ProjectsTab = ({
 	const [chatOpen, setChatOpen] = useState(false);
 	const [listStyle, setListStyle] = useState('grid');
 	const getListStyle = (val) => setListStyle(val);
+
+	const [memberModal, setMemberModal] = useState(false);
+	const handleOpenMember = () => setMemberModal(true);
+	const handleCloseMember = () => setMemberModal(false);
 
 	const location = useLocation();
 	const history = useHistory();
@@ -384,7 +389,9 @@ const ProjectsTab = ({
 					</div>
 					<div className="pt-members">
 						<AppToolTip title="Add Member">
-							<span className="pt-add-member fja">
+							<span
+								className="pt-add-member fja"
+								onClick={handleOpenMember}>
 								<IoAdd />
 							</span>
 						</AppToolTip>
@@ -398,14 +405,15 @@ const ProjectsTab = ({
 								<span>{cookies.user.fullname}</span>
 							</div>
 						</AppToolTip>
-						<div className="pt-member fja">
-							<UserIcon rounded name="Brian" size={18} />
-							<span>Brian</span>
-						</div>
-						<div className="pt-member fja">
-							<UserIcon rounded name="Another" size={18} />
-							<span>Another</span>
-						</div>
+
+						{getProject(openedProject)
+							.members.slice(1)
+							.map((m) => (
+								<div key={m} className="pt-member fja">
+									<UserIcon rounded name={m} size={18} />
+									<span>{m}</span>
+								</div>
+							))}
 					</div>
 				</div>
 			) : (
@@ -471,6 +479,10 @@ const ProjectsTab = ({
 					)}
 
 					<SideChat />
+					<AddMemberModal
+						open={memberModal}
+						handleClose={handleCloseMember}
+					/>
 				</div>
 			) : projects.length > 0 ? (
 				<div className="pt-list">

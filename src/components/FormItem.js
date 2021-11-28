@@ -20,16 +20,18 @@ const FormItem = ({
 	disabled,
 	submitting,
 	onChange,
+	onClick,
 	onBlur,
 }) => {
 	const [visible, setVisible] = useState(false);
 	if (inputType === 'submit') {
 		return (
 			<FormButton
-				type="submit"
+				type={onClick ? 'button' : 'submit'}
 				width={width}
 				submitting={submitting}
-				disabled={disabled || submitting}>
+				disabled={disabled || submitting}
+				onClick={onClick}>
 				{submitting ? (
 					<Lottie
 						isClickToPauseDisabled={true}

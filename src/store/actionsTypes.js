@@ -18,6 +18,7 @@ export const P_EDIT_CLOSED = 'pEditClosed';
 
 export const PROJECT_CREATED = 'projectCreated';
 export const PROJECT_UPDATED = 'projectUpdated';
+export const MEMBER_ADDED = 'memberAdded';
 export const PROJECT_DELETED = 'projectDeleted';
 
 export const TASK_CREATED = 'taskCreated';

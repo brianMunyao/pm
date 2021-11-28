@@ -52,6 +52,23 @@ const rootReducer = (state = {}, action) => {
                     ),
                 ],
             };
+        case actions.MEMBER_ADDED:
+            return {
+                ...state,
+                projects: [
+                    ...state.projects.map((p) =>
+                        p._id === action.payload.project_id ?
+                        {
+                            ...p,
+                            members: [
+                                ...p.members,
+                                action.payload.user,
+                            ],
+                        } :
+                        p
+                    ),
+                ],
+            };
         case actions.PROJECT_DELETED:
             return {
                 ...state,

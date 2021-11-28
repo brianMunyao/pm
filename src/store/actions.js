@@ -56,6 +56,10 @@ const projectUpdated = (payload) => ({
     type: actions.PROJECT_UPDATED,
     payload,
 });
+const memberAdded = (user, project_id) => ({
+    type: actions.MEMBER_ADDED,
+    payload: { user, project_id },
+});
 const projectDeleted = (id) => ({
     type: actions.PROJECT_DELETED,
     payload: id,
@@ -152,6 +156,9 @@ export const addProject = (payload) => async(dispatch) => {
 };
 export const updateProject = (payload) => (dispatch) => {
     dispatch(projectUpdated(payload));
+};
+export const addMember = (email, project_id) => (dispatch) => {
+    dispatch(memberAdded(email, project_id));
 };
 export const deleteProject = (id) => async(dispatch) => {
     const { data } = await axios.delete(proxy(`/projects/${id}`));
