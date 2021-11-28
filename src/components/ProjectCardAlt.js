@@ -47,7 +47,7 @@ const ProjectCardAlt = ({ tasks, data, onClick }) => {
 				<p className="pca-progress-title">Progress</p>
 				<ProgressBar
 					width={getProgress(
-						tasks.filter((t) => t.project_id === data.id)
+						tasks.filter((t) => t.project_id === data._id)
 					)}
 					color="white"
 					// bgColor={getLightColor(color)}

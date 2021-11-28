@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
 import {
+	IoAdd,
 	IoAddCircleOutline,
 	IoAddOutline,
 	IoChatbubbles,
@@ -16,6 +17,7 @@ import moment from 'moment';
 import axios from 'axios';
 import ioClient from 'socket.io-client';
 import { useHistory, useLocation } from 'react-router';
+import { useCookies } from 'react-cookie';
 
 import ProjectCard from '../components/ProjectCard';
 import TaskItem from '../components/TaskItem';
@@ -34,6 +36,9 @@ import {
 	sendMsg,
 } from '../store/actions';
 import empty from '../assets/empty.png';
+import AppToolTip from '../components/AppToolTip';
+import UserIcon from '../components/UserIcon';
+import { getColor, getLightColor } from '../apis/funcs';
 
 const socket = ioClient.connect('http://localhost:8000');
 
@@ -52,6 +57,8 @@ const ProjectsTab = ({
 	updateTask,
 	sendMsg,
 }) => {
+	const [cookies] = useCookies(['user']);
+
 	const [backlog, setBacklog] = useState([]);
 	const [inprogress, setInprogress] = useState([]);
 	const [completed, setCompleted] = useState([]);
@@ -334,7 +341,9 @@ const ProjectsTab = ({
 	};
 
 	return (
-		<Container chatOpen={chatOpen}>
+		<Container
+			chatOpen={chatOpen}
+			color={openedProject && getProject(openedProject).color}>
 			{openedProject ? (
 				<div className="pt-top-alt">
 					<span className="pt-back fja" onClick={handleCloseProject}>
@@ -371,6 +380,31 @@ const ProjectsTab = ({
 								className="chat-icon"
 								onClick={toggleChat}
 							/>
+						</div>
+					</div>
+					<div className="pt-members">
+						<AppToolTip title="Add Member">
+							<span className="pt-add-member fja">
+								<IoAdd />
+							</span>
+						</AppToolTip>
+						<AppToolTip title="Lead" placement="top">
+							<div className="pt-member fja">
+								<UserIcon
+									rounded
+									name={cookies.user.fullname}
+									size={18}
+								/>
+								<span>{cookies.user.fullname}</span>
+							</div>
+						</AppToolTip>
+						<div className="pt-member fja">
+							<UserIcon rounded name="Brian" size={18} />
+							<span>Brian</span>
+						</div>
+						<div className="pt-member fja">
+							<UserIcon rounded name="Another" size={18} />
+							<span>Another</span>
 						</div>
 					</div>
 				</div>
@@ -528,6 +562,38 @@ const Container = styled.div`
 			div {
 				display: flex;
 				align-items: center;
+			}
+		}
+		.pt-members {
+			display: flex;
+			width: 100%;
+			padding: 5px 0;
+			align-items: center;
+			.pt-add-member {
+				border-radius: 10px;
+				cursor: pointer;
+				width: 24px;
+				height: 24px;
+				color: ${({ color }) => getColor(color)};
+				background: ${({ color }) => getLightColor(color)};
+				transition: all 0.2s linear;
+				&:hover {
+					background: ${({ color }) => getColor(color)};
+					color: white;
+				}
+			}
+			.pt-member {
+				cursor: pointer;
+				user-select: none;
+				background-color: #eeeeee;
+				font-size: 12px;
+				border: 1.3px solid ${colors.primaryLighter};
+				padding: 2px 8px 2px 2px;
+				border-radius: 30px;
+				margin: 0 0 0 10px;
+				span {
+					margin-left: 3px;
+				}
 			}
 		}
 	}

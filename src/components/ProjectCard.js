@@ -129,6 +129,7 @@ const ProjectCard = ({
 					<AvatarGroup max={3}>
 						{members.map((m, i) => (
 							<UserIcon
+								key={i}
 								name={m}
 								// name={getByID(m, users).fullname} //!EDIT THIS
 								size={23}

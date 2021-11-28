@@ -13,10 +13,9 @@ const RadioGroup = ({ defaultValue = 0, data = [], onChange }) => {
 	return (
 		<StyledRadioGroup>
 			{data.map((item, index) => (
-				<AppToolTip title={item.label} placement="top">
+				<AppToolTip title={item.label} placement="top" key={index}>
 					<div
 						onClick={() => handleChange(index, item.value)}
-						key={index}
 						className={index === active ? 'rgi-active' : null}>
 						{item.icon}
 					</div>
