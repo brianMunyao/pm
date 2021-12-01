@@ -15,13 +15,17 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 
 import { tags } from '../apis/constants';
+import { getRandomColor } from '../apis/funcs';
 import colors from '../config/colors';
-import { updateTask, deleteTask } from '../store/actions';
+import { updateTask, deleteTask, updateProject } from '../store/actions';
 import TaskTag from './TaskTag';
 import AppToolTip from './AppToolTip';
 import emptyImg from '../assets/empty.png';
+import UserIcon from './UserIcon';
 
 const TaskItem = ({
+	projects,
+	openedProject,
 	data,
 	updateTask,
 	deleteTask,
@@ -29,6 +33,7 @@ const TaskItem = ({
 	empty,
 	quickView,
 	onClick,
+	updateProject,
 }) => {
 	const [taskInfo, setTaskInfo] = useState({});
 	const [editMode, setEditMode] = useState(false);
@@ -38,8 +43,13 @@ const TaskItem = ({
 	const [aEl, setAEl] = useState(null);
 	const tagOpen = Boolean(aEl);
 
+	const [assignEl, setAssignEl] = useState(null);
+	const assignOpen = Boolean(assignEl);
+
 	const [dateAnchor, setDateAnchor] = useState(null);
 	const [dPickerOpen, setDPickerOpen] = useState(false);
+
+	const [newTag, setNewTag] = useState('');
 
 	const handleUpdate = (label, value) => {
 		const obj = { ...data };
@@ -47,28 +57,41 @@ const TaskItem = ({
 		setTaskInfo(obj);
 	};
 
-	const updateInfo = (obj) => {
+	const updateInfo = async () => {
 		toggleEditMode();
-		updateTask(obj || { ...taskInfo, title: taskInfo.title || 'new task' });
+		await updateTask(data._id, {
+			title: taskInfo.title || 'new task',
+		});
 	};
 
-	const markComplete = () => updateTask({ ...taskInfo, status: 2 });
+	const markComplete = async () => await updateTask(data._id, { status: 2 });
 	const checkMark = (e) =>
-		updateTask({ ...taskInfo, status: e.target.value === 'true' ? 1 : 2 });
+		updateTask(data._id, {
+			status: e.target.value === 'true' ? 1 : 2,
+		});
 
-	const assignTask = () => updateTask({ ...taskInfo, assigned: 'Random' });
+	const assignTask = (id) => updateTask(data._id, { assigned: id });
 
 	const toggleEditMode = () => setEditMode(!editMode);
 
 	const handleNewTag = (t) => {
-		updateTask({ ...taskInfo, tags: [...taskInfo.tags, t] });
+		updateTask(data._id, { tags: [...taskInfo.tags, t] });
 	};
 
 	const handleDelTag = (t) => {
-		updateTask({
-			...taskInfo,
+		updateTask(data._id, {
 			tags: taskInfo.tags.filter((tg) => tg !== t),
 		});
+	};
+
+	const genNewTag = async () => {
+		const tag = {
+			id: Date.now().toString(),
+			title: newTag,
+			color: getRandomColor(),
+		};
+		const p = projects.filter((i) => i._id === openedProject)[0];
+		await updateProject(p._id, { tags: [...p.tags, tag] });
 	};
 
 	useEffect(() => {
@@ -134,7 +157,12 @@ const TaskItem = ({
 					{listStyle === 'list' &&
 						data.tags.map((t, i) => (
 							<TaskTag
-								title={t}
+								id={t}
+								list={
+									projects.filter(
+										(item) => item._id === data.project_id
+									)[0].tags
+								}
 								key={i}
 								deleteTag={() => handleDelTag(t)}
 							/>
@@ -146,7 +174,12 @@ const TaskItem = ({
 				<div className="ti-tags">
 					{data.tags.map((t, i) => (
 						<TaskTag
-							title={t}
+							id={t}
+							list={
+								projects.filter(
+									(item) => item._id === data.project_id
+								)[0].tags
+							}
 							key={i}
 							deleteTag={() => handleDelTag(t)}
 						/>
@@ -156,21 +189,68 @@ const TaskItem = ({
 
 			<div className="ti-bottom">
 				<div className="ti-dashed-con">
-					{data.assigned ? (
-						<AppToolTip title={data.assigned}>
-							<Avatar
-								alt={data.assigned}
-								src="./e.js"
-								sx={{ width: 24, height: 24, fontSize: 14 }}
+					{data.assigned && openedProject ? (
+						<AppToolTip
+							title={projects
+								.filter((i) => i._id === openedProject)[0]
+								.members.filter(
+									(m) => m.user_id === data.assigned
+								)}>
+							<UserIcon
+								rounded
+								name={projects
+									.filter((i) => i._id === openedProject)[0]
+									.members.filter(
+										(m) => m.user_id === data.assigned
+									)}
+								size={25}
 							/>
 						</AppToolTip>
 					) : (
-						<AppToolTip title="Assign">
-							<span className="ti-dashed" onClick={assignTask}>
-								<IoPersonAddOutline />
-							</span>
-						</AppToolTip>
+						<span
+							aria-controls="assign-menu"
+							onClick={(e) => setAssignEl(e.currentTarget)}>
+							<AppToolTip title="Assign">
+								<span className="ti-dashed">
+									<IoPersonAddOutline />
+								</span>
+							</AppToolTip>
+						</span>
 					)}
+
+					<Menu
+						id="assign-menu"
+						open={assignOpen}
+						anchorEl={assignEl}
+						onClose={() => setAssignEl(null)}
+						sx={{
+							'& .css-6hp17o-MuiList-root-MuiMenu-list': {
+								padding: '8px 4px',
+								'& li': {
+									padding: '2px 5px',
+									fontSize: 13,
+									letterSpacing: '.3px',
+									cursor: 'pointer',
+									transition: 'all .1s linear',
+									borderRadius: '5px',
+									'&:hover': {
+										background: '#e2e2e2',
+									},
+								},
+							},
+						}}>
+						{openedProject &&
+							projects
+								.filter((i) => i._id === openedProject)[0]
+								.members.map((v, i) => (
+									<li
+										key={i}
+										onClick={() => assignTask(v._id)}>
+										{v.fullname}
+									</li>
+								))}
+					</Menu>
+
 					<span
 						aria-controls="tag-menu"
 						onClick={(e) => setAEl(e.currentTarget)}>
@@ -202,15 +282,23 @@ const TaskItem = ({
 								},
 							},
 						}}>
-						<input type="text" name="q" id="q" />
-						{Object.keys(tags).map(
-							(t, i) =>
-								!data.tags.includes(t) && (
+						<input
+							type="text"
+							placeholder="Enter new tag"
+							value={newTag}
+							onChange={(e) => setNewTag(e.target.value)}
+							onKeyPress={(e) =>
+								e.key === 'Enter' ? genNewTag() : null
+							}
+						/>
+						{openedProject &&
+							projects
+								.filter((i) => i._id === openedProject)[0]
+								.tags.map((t, i) => (
 									<li key={i} onClick={() => handleNewTag(t)}>
-										{t}
+										{t.title}
 									</li>
-								)
-						)}
+								))}
 					</Menu>
 				</div>
 
@@ -220,7 +308,7 @@ const TaskItem = ({
 						label="date-picker"
 						value={taskInfo.due_date}
 						onChange={(val) => {
-							updateTask({ ...taskInfo, due_date: val });
+							updateTask(data._id, { due_date: val });
 							setDPickerOpen(false);
 						}}
 						onClose={() => setDPickerOpen(false)}
@@ -450,4 +538,13 @@ const Empty = styled.div`
 	}
 `;
 
-export default connect(null, { updateTask, deleteTask })(TaskItem);
+const mapStateToProps = ({ openedProject, projects }) => ({
+	openedProject,
+	projects,
+});
+
+export default connect(mapStateToProps, {
+	updateTask,
+	deleteTask,
+	updateProject,
+})(TaskItem);

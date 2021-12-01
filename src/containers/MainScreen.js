@@ -21,6 +21,7 @@ import {
 	closeProject,
 	fetchData,
 	openPModal,
+	resetStore,
 } from '../store/actions';
 import ProjectModal from '../components/ProjectModal';
 import InboxTab from './InboxTab';
@@ -47,6 +48,7 @@ const MainScreen = ({
 	minimizeNav,
 	closeProject,
 	openPModal,
+	resetStore,
 }) => {
 	const [activeNav, setActiveNav] = useState(0);
 	const [cookies, removeCookie] = useCookies(['user']);
@@ -114,14 +116,19 @@ const MainScreen = ({
 		}
 	}, [maximizeNav, minimizeNav, navMini, navLock]);
 
-	const logout = () => removeCookie('user');
+	const logout = () => {
+		removeCookie('user');
+		resetStore();
+	};
 
 	const location = useLocation();
 	useEffect(() => {
-		getWidth();
-		setActiveNav(navs.findIndex(({ to }) => to === location.pathname));
-		window.addEventListener('resize', getWidth);
-		if (!appLoaded) fetchData();
+		if (isLoggedIn(cookies)) {
+			getWidth();
+			setActiveNav(navs.findIndex(({ to }) => to === location.pathname));
+			window.addEventListener('resize', getWidth);
+			if (!appLoaded) fetchData(cookies.user._id);
+		}
 	}, [location, getWidth, appLoaded, fetchData]);
 
 	if (!isLoggedIn(cookies)) return <Redirect to="/login" />;
@@ -280,4 +287,5 @@ export default connect(mapStateToProps, {
 	closeProject,
 	fetchData,
 	openPModal,
+	resetStore,
 })(MainScreen);

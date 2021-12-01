@@ -29,6 +29,7 @@ const LoginScreen = () => {
 			setFormError('');
 			try {
 				const res = await loginUser(values);
+				console.log(res);
 				if (res.data) {
 					setCookie('user', res.data);
 				} else {

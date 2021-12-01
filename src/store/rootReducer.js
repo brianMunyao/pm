@@ -1,4 +1,17 @@
 import * as actions from './actionsTypes';
+const initialState = {
+    appLoaded: false,
+    openedProject: null,
+    pModal: false,
+    tModal: false,
+    pEdit: null,
+    navMini: false,
+    navLock: false,
+    tasks: [],
+    projects: [],
+    chats: [],
+};
+
 const rootReducer = (state = {}, action) => {
     switch (action.type) {
         // case actions.USER_LOGIN:
@@ -7,6 +20,8 @@ const rootReducer = (state = {}, action) => {
         // case actions.USER_SIGNUP:
         //     return {...state };
 
+        case 'RESET':
+            return initialState;
         case actions.DATA_FETCHED:
             return {...state, ...action.payload, appLoaded: true };
 

@@ -45,8 +45,7 @@ const ProjectModal = ({
 			setTypeError(type === '' ? 'Field cannot be empty' : '');
 		} else {
 			if (pEdit) {
-				updateProject({
-					...pEdit,
+				await updateProject(pEdit._id, {
 					title,
 					type,
 					color,
@@ -59,6 +58,16 @@ const ProjectModal = ({
 					due_date,
 					color,
 					created_by: cookies.user._id,
+					tags: [
+						{ id: '1', title: 'Frontend', color: 'green' },
+						{ id: '2', title: 'Backend', color: 'red' },
+					],
+					members: [
+						{
+							fullname: cookies.user.fullname,
+							user_id: cookies.user._id,
+						},
+					],
 				});
 			}
 			closePModal();
@@ -181,7 +190,6 @@ const Container = styled.div`
 		.pm-colors {
 			display: flex;
 			width: 100%;
-			overflow-x: auto;
 			margin: 0 0 10px;
 		}
 	}

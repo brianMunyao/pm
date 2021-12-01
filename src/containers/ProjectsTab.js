@@ -5,6 +5,7 @@ import {
 	IoAdd,
 	IoAddCircleOutline,
 	IoAddOutline,
+	IoChatbubbleEllipses,
 	IoChatbubbles,
 	IoChevronBack,
 	IoGridOutline,
@@ -34,14 +35,15 @@ import {
 	addTask,
 	updateTask,
 	sendMsg,
+	getUserByID,
 } from '../store/actions';
 import empty from '../assets/empty.png';
 import AppToolTip from '../components/AppToolTip';
 import AddMemberModal from '../components/AddMemberModal';
 import UserIcon from '../components/UserIcon';
-import { getColor, getLightColor } from '../apis/funcs';
+import { getColor, getLightColor, getProgress } from '../apis/funcs';
 
-const socket = ioClient.connect('http://localhost:8000');
+// const socket = ioClient.connect('http://localhost:8000');
 
 const ProjectsTab = ({
 	chats,
@@ -73,6 +75,9 @@ const ProjectsTab = ({
 	const handleOpenMember = () => setMemberModal(true);
 	const handleCloseMember = () => setMemberModal(false);
 
+	const [p_complete, setP_complete] = useState([]);
+	const [p_incomplete, setP_incomplete] = useState([]);
+
 	const location = useLocation();
 	const history = useHistory();
 
@@ -81,7 +86,9 @@ const ProjectsTab = ({
 			sendMsg({
 				text: msg,
 				date: moment().toLocaleString(),
-				name: 'me',
+				fullname: cookies.user.fullname,
+				user_id: cookies.user._id,
+				project_id: openedProject,
 			});
 			setMsg('');
 			// axios
@@ -118,6 +125,30 @@ const ProjectsTab = ({
 		}
 	}, [chats, openedProject]);
 
+	const groupProjects = useCallback(
+		(arr) => {
+			const isProjectComplete = (id) =>
+				getProgress(
+					tasks.filter((t) => t.project_id === id),
+					1
+				);
+
+			const c_arr = [],
+				i_arr = [];
+
+			arr.forEach((p) => {
+				if (isProjectComplete(p._id)) {
+					c_arr.push(p);
+					setP_complete(c_arr);
+				} else {
+					i_arr.push(p);
+					setP_incomplete(i_arr);
+				}
+			});
+		},
+		[tasks]
+	);
+
 	useEffect(() => {
 		// socket.on('chat', (res) => {
 		// 	console.log(10);
@@ -135,6 +166,8 @@ const ProjectsTab = ({
 		setCompleted(ptasks.filter((t) => t.status === 2));
 		updateScroll();
 
+		groupProjects(projects);
+
 		if (location.state) {
 			openProject(location.state);
 			history.replace(location.pathname);
@@ -148,6 +181,8 @@ const ProjectsTab = ({
 		openProject,
 		history,
 		location.pathname,
+		groupProjects,
+		projects,
 	]);
 
 	const DnD = ({ list, id, lStyle }) => (
@@ -192,8 +227,7 @@ const ProjectsTab = ({
 								due_date: moment()
 									.add(7, 'days')
 									.toLocaleString(),
-								duration: 7,
-								type: 'task',
+								created_by: cookies.user._id,
 							});
 						}}>
 						<IoAddCircleOutline /> Add
@@ -207,20 +241,28 @@ const ProjectsTab = ({
 		<div className="pt-side-chat">
 			<p className="pt-chat-title">Group Chat</p>
 			<div className="pt-chats">
-				{chats.map((c, i) => (
-					<Chat me={c.name === 'me'} key={i}>
-						{/** //! CHANGE THIS TO USERID */}
-						<div className="pt-chat-inner">
-							{c.name !== 'me' && (
-								<span className="pt-chat-name">{c.name}</span>
-							)}
-							<span className="pt-chat-text">{c.text}</span>
-							<span className="pt-chat-date">
-								{moment(c.date).format('HH:MM')}
-							</span>
-						</div>
-					</Chat>
-				))}
+				{chats.length > 0 ? (
+					chats.map((c, i) => (
+						<Chat me={c.user_id === cookies.user._id} key={i}>
+							<div className="pt-chat-inner">
+								{c.user_id !== cookies.user._id && (
+									<span className="pt-chat-name">
+										{c.fullname}
+									</span>
+								)}
+								<span className="pt-chat-text">{c.text}</span>
+								<span className="pt-chat-date">
+									{moment(c.date).format('HH:MM')}
+								</span>
+							</div>
+						</Chat>
+					))
+				) : (
+					<div className="chat-empty fja">
+						<IoChatbubbleEllipses />
+						<span>No chats</span>
+					</div>
+				)}
 			</div>
 
 			<div className="pt-chats-input">
@@ -293,8 +335,7 @@ const ProjectsTab = ({
 				setCompleted(items);
 			}
 		} else {
-			updateTask({
-				...getTaskByID(Number(draggableId)),
+			updateTask(draggableId, {
 				status: Number(destination.droppableId),
 			});
 
@@ -361,13 +402,13 @@ const ProjectsTab = ({
 						</h2>
 						<div>
 							<RadioGroup
-								defaultValue={1}
+								defaultValue={0}
 								data={[
-									{
-										icon: <BsBarChartSteps />,
-										value: 'gantt',
-										label: 'Gantt Chart',
-									},
+									// {
+									// 	icon: <BsBarChartSteps />,
+									// 	value: 'gantt',
+									// 	label: 'Gantt Chart',
+									// },
 									{
 										icon: <IoGridOutline />,
 										value: 'grid',
@@ -395,25 +436,25 @@ const ProjectsTab = ({
 								<IoAdd />
 							</span>
 						</AppToolTip>
-						<AppToolTip title="Lead" placement="top">
-							<div className="pt-member fja">
-								<UserIcon
-									rounded
-									name={cookies.user.fullname}
-									size={18}
-								/>
-								<span>{cookies.user.fullname}</span>
-							</div>
-						</AppToolTip>
 
-						{getProject(openedProject)
-							.members.slice(1)
-							.map((m) => (
-								<div key={m} className="pt-member fja">
-									<UserIcon rounded name={m} size={18} />
-									<span>{m}</span>
+						{getProject(openedProject).members.map((m) => (
+							<AppToolTip
+								title={
+									m._id === cookies.user._id
+										? 'Lead'
+										: 'Member'
+								}
+								placement="top">
+								<div className="pt-member fja">
+									<UserIcon
+										rounded
+										name={m.fullname}
+										size={18}
+									/>
+									<span>{m.fullname}</span>
 								</div>
-							))}
+							</AppToolTip>
+						))}
 					</div>
 				</div>
 			) : (
@@ -485,17 +526,37 @@ const ProjectsTab = ({
 					/>
 				</div>
 			) : projects.length > 0 ? (
-				<div className="pt-list">
-					{projects.map((p, i) => (
-						<ProjectCard
-							data={p}
-							key={i}
-							onClick={() => handleOpenProject(p._id)}
-							openUpdate={() => openPEdit(p)}
-							closeUpdate={closePEdit}
-							deleteProject={() => deleteProject(p._id)}
-						/>
-					))}
+				<div className="pt-list-con">
+					<div className="pt-list-title">
+						Ongoing <span>{p_incomplete.length}</span>
+					</div>
+					<div className="pt-list">
+						{p_incomplete.map((p, i) => (
+							<ProjectCard
+								data={p}
+								key={i}
+								onClick={() => handleOpenProject(p._id)}
+								openUpdate={() => openPEdit(p)}
+								closeUpdate={closePEdit}
+								deleteProject={() => deleteProject(p._id)}
+							/>
+						))}
+					</div>
+					<div className="pt-complete-title pt-list-title">
+						Completed <span>{p_complete.length}</span>
+					</div>
+					<div className="pt-list">
+						{p_complete.map((p, i) => (
+							<ProjectCard
+								data={p}
+								key={i}
+								onClick={() => handleOpenProject(p._id)}
+								openUpdate={() => openPEdit(p)}
+								closeUpdate={closePEdit}
+								deleteProject={() => deleteProject(p._id)}
+							/>
+						))}
+					</div>
 				</div>
 			) : (
 				<div className="pt-empty fja" onClick={openPModal}>
@@ -693,6 +754,14 @@ const Container = styled.div`
 				flex-direction: column;
 				overflow-y: auto;
 				padding: 0 5px;
+				.chat-empty {
+					opacity: 0.6;
+					flex: 1;
+					flex-direction: column;
+					svg {
+						font-size: 50px;
+					}
+				}
 			}
 			.pt-chats-input {
 				background: white;
@@ -722,15 +791,31 @@ const Container = styled.div`
 			}
 		}
 	}
-
-	.pt-list {
+	.pt-list-con {
 		padding: 10px 15px;
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-		grid-auto-rows: min-content;
-		gap: 20px;
-		height: 100%;
+		flex: 1;
 		overflow-y: auto;
+		.pt-complete-title {
+			margin-top: 15px;
+		}
+		.pt-list-title {
+			padding: 10px 5px;
+			font-weight: 600;
+			span {
+				opacity: 0.6;
+				margin-left: 5px;
+				color: ${colors.secondaryGreen};
+			}
+		}
+		.pt-list {
+			/* margin: 10px 15px; */
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+			grid-auto-rows: min-content;
+			gap: 20px;
+			/* height: fit-content; */
+			overflow-y: auto;
+		}
 	}
 	.pt-empty {
 		flex: 1;

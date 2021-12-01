@@ -2,13 +2,13 @@ import React from 'react';
 import { IoClose } from 'react-icons/io5';
 import styled from 'styled-components';
 
-import { tags } from '../apis/constants';
 import { getColor, getLightColor } from '../apis/funcs';
 
-const TaskTag = ({ title, deleteTag }) => {
+const TaskTag = ({ id, list, deleteTag }) => {
+	const getTag = () => list.filter((t) => t._id === id)[0];
 	return (
-		<Container color={tags[title]} className="fja">
-			{title}
+		<Container color={getTag().color} className="fja">
+			{getTag().title}
 			<span className="fja" onClick={deleteTag}>
 				<IoClose />
 			</span>

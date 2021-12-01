@@ -1,7 +1,6 @@
 import { applyMiddleware, compose, createStore } from 'redux';
 import thunk from 'redux-thunk';
 
-import { chats, projects, tasks } from '../apis/data'; //!CHANGE THIS
 import rootReducer from './rootReducer';
 
 const initialState = {
@@ -12,9 +11,9 @@ const initialState = {
     pEdit: null,
     navMini: false,
     navLock: false,
-    tasks: [...tasks],
+    tasks: [],
     projects: [],
-    chats: [...chats],
+    chats: [],
 };
 
 const store = createStore(

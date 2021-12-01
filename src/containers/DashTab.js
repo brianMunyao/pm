@@ -8,10 +8,16 @@ import { connect } from 'react-redux';
 import { useHistory } from 'react-router';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
-import { IoAddOutline } from 'react-icons/io5';
+import { PieChart, Pie } from 'recharts';
+import { IoAddOutline, IoFileTrayStackedOutline } from 'react-icons/io5';
 
 import colors from '../config/colors';
-import { getColor, getDatedTransactions, getLightColor } from '../apis/funcs';
+import {
+	getColor,
+	getDatedTransactions,
+	getLightColor,
+	getProgress,
+} from '../apis/funcs';
 import empty from '../assets/empty.png';
 import ProjectCardAlt from '../components/ProjectCardAlt';
 import TaskItem from '../components/TaskItem';
@@ -22,6 +28,9 @@ const DashTab = ({ projects, tasks, openPModal }) => {
 
 	const [projectsDue, setProjectsDue] = useState([]);
 	const [tasksDue, setTasksDue] = useState([]);
+
+	const [p_complete, setP_complete] = useState(0);
+	const [p_incomplete, setP_incomplete] = useState(0);
 
 	const [pView, setPView] = useState([]);
 	const [cookies] = useCookies(['user']);
@@ -62,11 +71,39 @@ const DashTab = ({ projects, tasks, openPModal }) => {
 		[projects, tasks]
 	);
 
+	const groupProjects = useCallback(
+		(arr) => {
+			const isProjectComplete = (id) =>
+				getProgress(
+					tasks.filter((t) => t.project_id === id),
+					1
+				);
+
+			const c_arr = [],
+				i_arr = [];
+
+			arr.forEach((p) => {
+				if (isProjectComplete(p._id)) {
+					c_arr.push(p);
+					// setP_complete(c_arr);
+				} else {
+					i_arr.push(p);
+					// setP_incomplete(i_arr);
+				}
+			});
+
+			setP_complete(c_arr.length);
+			setP_incomplete(i_arr.length);
+		},
+		[tasks]
+	);
+
 	const goToProject = (id) => history.push('/m/projects', id);
 
 	useEffect(() => {
 		handleMonthChange(dateValue);
-	}, [handleMonthChange, dateValue]);
+		groupProjects(projects);
+	}, [handleMonthChange, dateValue, projects, groupProjects]);
 
 	return (
 		<Container>
@@ -127,7 +164,44 @@ const DashTab = ({ projects, tasks, openPModal }) => {
 									<TaskItem empty />
 								)}
 							</div>
-							<div className="dt-some">sdj</div>
+
+							{/* <PieChart>
+								<Pie
+									data={[
+										{
+											name: 'Incomplete projects',
+											value: p_incomplete,
+										},
+										{
+											name: 'Complete projects',
+											value: p_complete,
+										},
+									]}
+									dataKey="value"
+									nameKey="name"
+									cx="50%"
+									cy="50%"
+									innerRadius={40}
+									fill="#f00"
+								/>
+							</PieChart> */}
+
+							<div className="dt-stats">
+								<div className="dt-stat">
+									<span className="dt-stat-icon  fja">
+										<IoFileTrayStackedOutline />
+									</span>
+
+									<div className="dt-stat-names">
+										<span className="dt-stat-title">
+											Active Projects
+										</span>
+										<span className="dt-stat-subtitle">
+											{projects.length}
+										</span>
+									</div>
+								</div>
+							</div>
 						</div>
 					</>
 				) : (
@@ -261,6 +335,54 @@ const Container = styled.div`
 					font-weight: 700;
 				}
 			}
+			.dt-stats {
+				padding: 20px;
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+				grid-auto-rows: 100px;
+				.dt-stat {
+					background: white;
+					box-shadow: 1px 2px 10px #d8d8d8;
+					padding: 15px;
+					border-radius: 10px;
+					display: flex;
+					align-items: center;
+					.dt-stat-icon {
+						background: ${colors.primaryLightest};
+						color: ${colors.primary};
+						width: 50px;
+						height: 50px;
+						border-radius: 30px;
+						font-size: 20px;
+						margin-right: 15px;
+					}
+					.dt-stat-names {
+						display: flex;
+						flex-direction: column;
+						color: ${colors.primary};
+						.dt-stat-title {
+							font-weight: 600;
+							font-size: 17px;
+							padding-bottom: 10px;
+						}
+					}
+				}
+			}
+			/* <div className="dt-stats">
+		<div className="dt-stat">
+			<span className="dt-stat-icon">
+				<IoFileTrayStackedOutline />
+			</span>
+			<div className="dt-stat-names">
+				<span className="dt-stat-title">
+					Active Projects
+				</span>
+				<span className="dt-stat-subtitle">
+					{projects.length}
+				</span>
+			</div>
+		</div>
+	</div> */
 		}
 		.dt-empty-alt {
 			flex-direction: column;

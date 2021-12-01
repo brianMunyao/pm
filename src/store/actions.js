@@ -92,15 +92,26 @@ const msgSent = (payload) => ({
 //     payload: user,
 // });
 
-// actions
-export const fetchData = () => async(dispatch) => {
-    const { data } = await axios.get(proxy('/projects'));
+export const resetStore = () => (dispatch) => {
+    dispatch({ type: 'RESET' });
+};
 
-    dispatch(
-        dataFetched({
-            projects: data.data,
-        })
-    );
+// actions
+export const fetchData = (id) => async(dispatch) => {
+    const { data } = await axios.get(proxy(`/projects/myprojects/${id}`));
+    if (data.data) {
+        const arr = data.data.map((d) => d._id);
+        const t = await axios.get(
+            proxy(`/task/mytasks/${JSON.stringify(arr)}`)
+        );
+
+        dispatch(
+            dataFetched({
+                projects: data.data,
+                tasks: t.data.data,
+            })
+        );
+    }
 };
 export const minimizeNav = () => (dispatch) => {
     dispatch(navMinimized());
@@ -136,17 +147,21 @@ export const closePEdit = () => (dispatch) => {
     dispatch(pEditClosed());
 };
 
-export const openProject = (id) => (dispatch) => {
+export const openProject = (id) => async(dispatch) => {
+    const { data } = await axios.get(proxy(`/chats/${id}`));
+    dispatch(dataFetched({ chats: data.data }));
     dispatch(projectOpened(id));
     dispatch(navLocked());
 };
 export const closeProject = () => (dispatch) => {
+    dispatch(dataFetched({ chats: [] }));
     dispatch(projectClosed());
     dispatch(navUnlocked());
 };
 
 export const addProject = (payload) => async(dispatch) => {
     const { data } = await axios.post(proxy('/projects/add'), payload);
+    console.log(payload);
 
     if (data.data) {
         dispatch(projectAdded(data.data));
@@ -154,11 +169,28 @@ export const addProject = (payload) => async(dispatch) => {
         console.log(data);
     }
 };
-export const updateProject = (payload) => (dispatch) => {
-    dispatch(projectUpdated(payload));
+export const updateProject = (id, payload) => async(dispatch) => {
+    await axios
+        .put(proxy(`/projects/${id}`), payload)
+        .then(({ data }) => {
+            if (data.data) {
+                dispatch(projectUpdated(data.data));
+            } else {
+                console.log(data);
+            }
+        })
+        .catch((err) => console.log(err));
 };
-export const addMember = (email, project_id) => (dispatch) => {
-    dispatch(memberAdded(email, project_id));
+export const getUserByID = async(id) => {
+    const { data } = await axios.get(
+        `http://localhost:3001/users/userID/${id}`
+    );
+
+    if (data.data) {
+        return data.data.fullname;
+    } else {
+        return id;
+    }
 };
 export const deleteProject = (id) => async(dispatch) => {
     const { data } = await axios.delete(proxy(`/projects/${id}`));
@@ -170,24 +202,68 @@ export const deleteProject = (id) => async(dispatch) => {
     }
 };
 
-export const addTask = (payload) => (dispatch) => {
-    dispatch(taskAdded(payload));
+export const addTask = (payload) => async(dispatch) => {
+    await axios
+        .post(proxy(`/task/add`), payload)
+        .then(({ data }) => {
+            if (data.data) {
+                dispatch(taskAdded(data.data));
+            } else {
+                console.log(data);
+            }
+        })
+        .catch((err) => console.log(err));
 };
-export const updateTask = (payload) => (dispatch) => {
-    dispatch(taskUpdated(payload));
+export const updateTask = (id, payload) => async(dispatch) => {
+    console.log(id, payload);
+    await axios
+        .put(proxy(`/task/${id}`), payload)
+        .then(({ data }) => {
+            console.log(data);
+            if (data.data) {
+                dispatch(taskUpdated(data.data));
+            } else {
+                console.log(data);
+            }
+        })
+        .catch((err) => console.log(err));
 };
-export const deleteTask = (id) => (dispatch) => {
+export const deleteTask = (id) => async(dispatch) => {
+    await axios
+        .delete(proxy(`/task/${id}`))
+        .then(({ data }) => {
+            if (data.data) {
+                dispatch(taskDeleted(id));
+            } else {
+                console.log(data);
+            }
+        })
+        .catch((err) => console.log(err));
     dispatch(taskDeleted(id));
 };
 
-export const sendMsg = (payload) => (dispatch) => {
-    dispatch(msgSent(payload));
+export const sendMsg = (payload) => async(dispatch) => {
+    await axios
+        .post(proxy(`/chats/add`), payload)
+        .then(({ data }) => {
+            if (data.data) {
+                dispatch(msgSent(data.data));
+            } else {
+                console.log(data);
+            }
+        })
+        .catch((err) => console.log(err));
 };
 
-export const loginUser = async(user) => {
-    const { data } = await axios.post(proxy('/users/login'), user);
+export const updateChats = (id) => async(dispatch) => {};
 
-    return data;
+export const loginUser = async(user) => {
+    try {
+        const { data } = await axios.post(proxy('/users/login'), user);
+        return data;
+    } catch (err) {
+        return { error: 'Invalid username or password' };
+    }
 };
 
 export const signUpUser = async(user) => {

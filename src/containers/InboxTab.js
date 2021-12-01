@@ -1,24 +1,36 @@
 import React, { useState } from 'react';
-import { IoPaperPlaneOutline, IoTrailSignOutline } from 'react-icons/io5';
+import {
+	IoChatbubbleEllipses,
+	IoPaperPlaneOutline,
+	IoTrailSignOutline,
+} from 'react-icons/io5';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import moment from 'moment';
+import { useCookies } from 'react-cookie';
 
 import { getByID, getColor, getLightColor } from '../apis/funcs';
 import colors from '../config/colors';
-import { sendMsg } from '../store/actions';
+import { sendMsg, openProject } from '../store/actions';
 
-const InboxTab = ({ projects, chats, sendMsg }) => {
+const InboxTab = ({ projects, chats, sendMsg, openProject }) => {
+	const [cookies] = useCookies(['user']);
+
 	const [projectID, setProjectID] = useState(null);
 	const [msg, setMsg] = useState('');
+
+	const getProject = (id) => projects.filter((item) => item._id === id)[0];
 
 	const handleMsg = () => {
 		if (msg.trim().length > 0) {
 			sendMsg({
 				text: msg,
 				date: moment().toLocaleString(),
-				name: 'me',
+				fullname: cookies.user.fullname,
+				user_id: cookies.user._id,
+				project_id: projectID,
 			});
+			setMsg('');
 		}
 	};
 
@@ -36,7 +48,10 @@ const InboxTab = ({ projects, chats, sendMsg }) => {
 						<InboxTitle
 							color={p.color}
 							key={i}
-							onClick={() => setProjectID(p.id)}>
+							onClick={() => {
+								setProjectID(p._id);
+								openProject(p._id);
+							}}>
 							<span className="it-group-title"># {p.title}</span>
 							{p.chats > 0 ? (
 								<span className="it-group-chats fja">
@@ -53,27 +68,35 @@ const InboxTab = ({ projects, chats, sendMsg }) => {
 				{projectID ? (
 					<>
 						<p className="it-chats-title">
-							{getByID(projectID, projects).title}
+							{getProject(projectID).title}
 						</p>
 						<div className="it-chats">
-							{chats.map((c, i) => (
-								<Chat me={c.name === 'me'} key={i}>
-									{/** //! CHANGE THIS TO USERID */}
-									<div className="it-chat-inner">
-										{c.name !== 'me' && (
-											<span className="it-chat-name">
-												{c.name}
+							{chats.length > 0 ? (
+								chats.map((c, i) => (
+									<Chat
+										me={c.user_id === cookies.user._id}
+										key={i}>
+										<div className="it-chat-inner">
+											{c.user_id !== cookies.user._id && (
+												<span className="it-chat-name">
+													{c.fullname}
+												</span>
+											)}
+											<span className="it-chat-text">
+												{c.text}
 											</span>
-										)}
-										<span className="it-chat-text">
-											{c.text}
-										</span>
-										<span className="it-chat-date">
-											{moment(c.date).format('HH:MM')}
-										</span>
-									</div>
-								</Chat>
-							))}
+											<span className="it-chat-date">
+												{moment(c.date).format('HH:MM')}
+											</span>
+										</div>
+									</Chat>
+								))
+							) : (
+								<div className="chat-empty fja">
+									<IoChatbubbleEllipses />
+									<span>No chats</span>
+								</div>
+							)}
 						</div>
 						<div className="it-chats-input">
 							<input
@@ -189,6 +212,14 @@ const Container = styled.div`
 				cursor: pointer;
 			}
 		}
+		.chat-empty {
+			opacity: 0.6;
+			flex: 1;
+			flex-direction: column;
+			svg {
+				font-size: 50px;
+			}
+		}
 	}
 `;
 
@@ -252,5 +283,9 @@ const Chat = styled.div`
 	}
 `;
 
-const mapStateToProps = ({ projects, chats }) => ({ projects, chats });
-export default connect(mapStateToProps, { sendMsg })(InboxTab);
+const mapStateToProps = ({ projects, chats, openedProject }) => ({
+	projects,
+	chats,
+	openedProject,
+});
+export default connect(mapStateToProps, { sendMsg, openProject })(InboxTab);
