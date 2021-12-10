@@ -215,11 +215,9 @@ export const addTask = (payload) => async(dispatch) => {
         .catch((err) => console.log(err));
 };
 export const updateTask = (id, payload) => async(dispatch) => {
-    console.log(id, payload);
     await axios
         .put(proxy(`/task/${id}`), payload)
         .then(({ data }) => {
-            console.log(data);
             if (data.data) {
                 dispatch(taskUpdated(data.data));
             } else {

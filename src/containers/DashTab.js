@@ -8,8 +8,7 @@ import { connect } from 'react-redux';
 import { useHistory } from 'react-router';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
-import { PieChart, Pie } from 'recharts';
-import { IoAddOutline, IoFileTrayStackedOutline } from 'react-icons/io5';
+import { IoAddOutline } from 'react-icons/io5';
 
 import colors from '../config/colors';
 import {
@@ -22,12 +21,10 @@ import empty from '../assets/empty.png';
 import ProjectCardAlt from '../components/ProjectCardAlt';
 import TaskItem from '../components/TaskItem';
 import { openPModal } from '../store/actions';
+import DashChart from '../components/DashChart';
 
 const DashTab = ({ projects, tasks, openPModal }) => {
 	const [dateValue, setDateValue] = useState(moment());
-
-	const [projectsDue, setProjectsDue] = useState([]);
-	const [tasksDue, setTasksDue] = useState([]);
 
 	const [p_complete, setP_complete] = useState(0);
 	const [p_incomplete, setP_incomplete] = useState(0);
@@ -63,8 +60,6 @@ const DashTab = ({ projects, tasks, openPModal }) => {
 					moment(t.due_date).isSame(newMonth, 'month')
 				);
 
-			setProjectsDue(pDue);
-			setTasksDue(tDue);
 			const res = getDatedTransactions([...pDue, ...tDue]);
 			setPView(res);
 		},
@@ -165,28 +160,22 @@ const DashTab = ({ projects, tasks, openPModal }) => {
 								)}
 							</div>
 
-							{/* <PieChart>
-								<Pie
-									data={[
-										{
-											name: 'Incomplete projects',
-											value: p_incomplete,
-										},
-										{
-											name: 'Complete projects',
-											value: p_complete,
-										},
-									]}
-									dataKey="value"
-									nameKey="name"
-									cx="50%"
-									cy="50%"
-									innerRadius={40}
-									fill="#f00"
-								/>
-							</PieChart> */}
+							<DashChart
+								data={[
+									{
+										name: 'Incomplete projects',
+										value: p_incomplete,
+										color: colors.red,
+									},
+									{
+										name: 'Complete projects',
+										value: p_complete,
+										color: colors.lightGreen,
+									},
+								]}
+							/>
 
-							<div className="dt-stats">
+							{/* <div className="dt-stats">
 								<div className="dt-stat">
 									<span className="dt-stat-icon  fja">
 										<IoFileTrayStackedOutline />
@@ -201,7 +190,7 @@ const DashTab = ({ projects, tasks, openPModal }) => {
 										</span>
 									</div>
 								</div>
-							</div>
+							</div> */}
 						</div>
 					</>
 				) : (
@@ -239,7 +228,9 @@ const DashTab = ({ projects, tasks, openPModal }) => {
 										<SItem
 											color={v.color}
 											key={i}
-											onClick={() => goToProject(v.id)}>
+											onClick={() =>
+												goToProject(v.project_id)
+											}>
 											<div className="si-top">
 												<span className="si-dot"></span>
 												<span className="si-type">

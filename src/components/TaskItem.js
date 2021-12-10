@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Avatar, IconButton, Menu } from '@mui/material';
+import { IconButton, Menu } from '@mui/material';
 import DateAdapter from '@mui/lab/AdapterMoment';
 import { DatePicker, LocalizationProvider } from '@mui/lab';
 import {
@@ -14,7 +14,6 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import moment from 'moment';
 
-import { tags } from '../apis/constants';
 import { getRandomColor } from '../apis/funcs';
 import colors from '../config/colors';
 import { updateTask, deleteTask, updateProject } from '../store/actions';
