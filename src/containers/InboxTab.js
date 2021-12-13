@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
 	IoChatbubbleEllipses,
 	IoPaperPlaneOutline,
@@ -9,11 +9,10 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 import { useCookies } from 'react-cookie';
 
-import { getByID, getColor, getLightColor } from '../apis/funcs';
+import { getColor, getLightColor } from '../apis/funcs';
 import colors from '../config/colors';
-import { sendMsg, openProject } from '../store/actions';
 
-const InboxTab = ({ projects, chats, sendMsg, openProject }) => {
+const InboxTab = ({ projects, chats, socket }) => {
 	const [cookies] = useCookies(['user']);
 
 	const [projectID, setProjectID] = useState(null);
@@ -21,26 +20,33 @@ const InboxTab = ({ projects, chats, sendMsg, openProject }) => {
 
 	const getProject = (id) => projects.filter((item) => item._id === id)[0];
 
+	const updateScroll = useCallback(() => {
+		if (projectID) {
+			const elem = document.querySelector('.it-chats');
+			elem.scrollTop = elem.scrollHeight;
+		}
+	}, [projectID]);
+
 	const handleMsg = () => {
 		if (msg.trim().length > 0) {
-			sendMsg({
+			setMsg('');
+			socket.emit('chats', {
 				text: msg,
 				date: moment().toLocaleString(),
 				fullname: cookies.user.fullname,
 				user_id: cookies.user._id,
 				project_id: projectID,
 			});
-			setMsg('');
 		}
 	};
+
+	useEffect(() => {
+		updateScroll();
+	}, [updateScroll, chats]);
 
 	return (
 		<Container>
 			<div className="it-sidebar it-parts">
-				{/* <div className="it-searchbar">
-					<IoSearchOutline />
-					<input type="search" name="" id="" />
-				</div> */}
 				<div className="it-groups">
 					<div className="it-title">GROUPS</div>
 
@@ -50,7 +56,6 @@ const InboxTab = ({ projects, chats, sendMsg, openProject }) => {
 							key={i}
 							onClick={() => {
 								setProjectID(p._id);
-								openProject(p._id);
 							}}>
 							<span className="it-group-title"># {p.title}</span>
 							{p.chats > 0 ? (
@@ -71,26 +76,36 @@ const InboxTab = ({ projects, chats, sendMsg, openProject }) => {
 							{getProject(projectID).title}
 						</p>
 						<div className="it-chats">
-							{chats.length > 0 ? (
-								chats.map((c, i) => (
-									<Chat
-										me={c.user_id === cookies.user._id}
-										key={i}>
-										<div className="it-chat-inner">
-											{c.user_id !== cookies.user._id && (
-												<span className="it-chat-name">
-													{c.fullname}
+							{Boolean(chats[projectID]) ? (
+								chats[projectID].length > 0 ? (
+									chats[projectID].map((c, i) => (
+										<Chat
+											me={c.user_id === cookies.user._id}
+											key={i}>
+											<div className="it-chat-inner">
+												{c.user_id !==
+													cookies.user._id && (
+													<span className="it-chat-name">
+														{c.fullname}
+													</span>
+												)}
+												<span className="it-chat-text">
+													{c.text}
 												</span>
-											)}
-											<span className="it-chat-text">
-												{c.text}
-											</span>
-											<span className="it-chat-date">
-												{moment(c.date).format('HH:MM')}
-											</span>
-										</div>
-									</Chat>
-								))
+												<span className="it-chat-date">
+													{moment(c.date).format(
+														'HH:MM'
+													)}
+												</span>
+											</div>
+										</Chat>
+									))
+								) : (
+									<div className="chat-empty fja">
+										<IoChatbubbleEllipses />
+										<span>No chats</span>
+									</div>
+								)
 							) : (
 								<div className="chat-empty fja">
 									<IoChatbubbleEllipses />
@@ -283,9 +298,9 @@ const Chat = styled.div`
 	}
 `;
 
-const mapStateToProps = ({ projects, chats, openedProject }) => ({
+const mapStateToProps = ({ projects, chats, socket }) => ({
 	projects,
 	chats,
-	openedProject,
+	socket,
 });
-export default connect(mapStateToProps, { sendMsg, openProject })(InboxTab);
+export default connect(mapStateToProps, {})(InboxTab);

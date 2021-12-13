@@ -1,16 +1,5 @@
 import * as actions from './actionsTypes';
-const initialState = {
-    appLoaded: false,
-    openedProject: null,
-    pModal: false,
-    tModal: false,
-    pEdit: null,
-    navMini: false,
-    navLock: false,
-    tasks: [],
-    projects: [],
-    chats: [],
-};
+import { initialState } from './store';
 
 const rootReducer = (state = {}, action) => {
     switch (action.type) {
@@ -95,15 +84,7 @@ const rootReducer = (state = {}, action) => {
         case actions.TASK_CREATED:
             return {
                 ...state,
-                tasks: [
-                    ...state.tasks,
-                    {
-                        ...action.payload,
-                        assigned: null, //!CHANGE THIS TO GET ASSIGN IN DB
-                        tags: [],
-                        _id: state.tasks.length + 21, //!CHANGE THIS TO GET ASSIGN IN DB
-                    },
-                ],
+                tasks: [...state.tasks, action.payload],
             };
         case actions.TASK_UPDATED:
             return {
@@ -122,11 +103,13 @@ const rootReducer = (state = {}, action) => {
         case actions.MSG_SENT:
             return {
                 ...state,
-                chats: [
-                    ...state.chats,
-                    {...action.payload, _id: state.chats.length + 1 },
-                ], //!CHANGE THIS TO GET ASSIGN IN DB
+                chats: [...state.chats, action.payload],
             };
+        case 'REFRESH_CHATS':
+            let c = {...state.chats };
+            c[action.payload.p_id] = action.payload.payload;
+
+            return {...state, chats: c };
 
         default:
             return state;

@@ -3,7 +3,7 @@ import thunk from 'redux-thunk';
 
 import rootReducer from './rootReducer';
 
-const initialState = {
+export const initialState = {
     appLoaded: false,
     openedProject: null,
     pModal: false,
@@ -13,7 +13,8 @@ const initialState = {
     navLock: false,
     tasks: [],
     projects: [],
-    chats: [],
+    chats: {},
+    socket: null,
 };
 
 const store = createStore(

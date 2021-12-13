@@ -7,6 +7,7 @@ import moment from 'moment';
 import { connect } from 'react-redux';
 import { IoCalendarClearOutline } from 'react-icons/io5';
 import { useCookies } from 'react-cookie';
+import { useHistory } from 'react-router';
 
 import { closePModal, addProject, updateProject } from '../store/actions';
 import FormItem from './FormItem';
@@ -38,6 +39,8 @@ const ProjectModal = ({
 	const [dateAnchor, setDateAnchor] = useState(null);
 	const [dPickerOpen, setDPickerOpen] = useState(false);
 
+	const history = useHistory();
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		if (title === '' || type === '') {
@@ -52,27 +55,32 @@ const ProjectModal = ({
 					due_date,
 				});
 			} else {
-				await addProject({
-					title,
-					type,
-					due_date,
-					color,
-					created_by: cookies.user._id,
-					tags: [
-						{ id: '1', title: 'Frontend', color: 'green' },
-						{ id: '2', title: 'Backend', color: 'red' },
-					],
-					members: [
-						{
-							fullname: cookies.user.fullname,
-							user_id: cookies.user._id,
-						},
-					],
-				});
+				await addProject(
+					{
+						title,
+						type,
+						due_date,
+						color,
+						created_by: cookies.user._id,
+						tags: [
+							{ id: '1', title: 'Frontend', color: 'green' },
+							{ id: '2', title: 'Backend', color: 'red' },
+						],
+						members: [
+							{
+								fullname: cookies.user.fullname,
+								user_id: cookies.user._id,
+							},
+						],
+					},
+					goToProject
+				);
 			}
 			closePModal();
 		}
 	};
+
+	const goToProject = (id) => history.push('/m/projects', id);
 
 	useEffect(() => {
 		setTitle(pEdit ? pEdit.title : '');

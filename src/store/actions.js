@@ -1,6 +1,7 @@
 import axios from 'axios';
-import * as actions from './actionsTypes';
+import ioClient from 'socket.io-client';
 
+import * as actions from './actionsTypes';
 const proxy = (path) => `http://localhost:3001${path}`;
 
 //action creators
@@ -97,18 +98,48 @@ export const resetStore = () => (dispatch) => {
 };
 
 // actions
+const groupBy = (by, arr, p_ids) => {
+    const obj = {};
+    if (p_ids) {
+        p_ids.forEach((v) => {
+            obj[p_ids] = [];
+        });
+    }
+
+    arr.forEach((elem) => {
+        const key = elem[by];
+        if (Object.keys(obj).includes(key)) {
+            obj[key] = [...obj[key], elem];
+        } else {
+            obj[key] = [elem];
+        }
+    });
+    return obj;
+};
+
 export const fetchData = (id) => async(dispatch) => {
     const { data } = await axios.get(proxy(`/projects/myprojects/${id}`));
+
     if (data.data) {
         const arr = data.data.map((d) => d._id);
         const t = await axios.get(
             proxy(`/task/mytasks/${JSON.stringify(arr)}`)
         );
+        const c = await axios.get(
+            proxy(`/chats/mychats/${JSON.stringify(arr)}`)
+        );
+
+        const socket = ioClient.connect('http://localhost:3001', {
+            transports: ['websocket'],
+            query: { id },
+        });
 
         dispatch(
             dataFetched({
+                socket,
                 projects: data.data,
                 tasks: t.data.data,
+                chats: groupBy('project_id', c.data.data, arr),
             })
         );
     }
@@ -149,22 +180,22 @@ export const closePEdit = () => (dispatch) => {
 
 export const openProject = (id) => async(dispatch) => {
     const { data } = await axios.get(proxy(`/chats/${id}`));
-    dispatch(dataFetched({ chats: data.data }));
+    // dispatch(dataFetched({ chats: data.data }));
     dispatch(projectOpened(id));
     dispatch(navLocked());
 };
 export const closeProject = () => (dispatch) => {
-    dispatch(dataFetched({ chats: [] }));
+    // dispatch(dataFetched({ chats: [] }));
     dispatch(projectClosed());
     dispatch(navUnlocked());
 };
 
-export const addProject = (payload) => async(dispatch) => {
+export const addProject = (payload, callback) => async(dispatch) => {
     const { data } = await axios.post(proxy('/projects/add'), payload);
-    console.log(payload);
 
     if (data.data) {
         dispatch(projectAdded(data.data));
+        callback(data.data._id);
     } else {
         console.log(data);
     }
@@ -221,7 +252,7 @@ export const updateTask = (id, payload) => async(dispatch) => {
             if (data.data) {
                 dispatch(taskUpdated(data.data));
             } else {
-                console.log(data);
+                console.log('Error', data);
             }
         })
         .catch((err) => console.log(err));
@@ -252,8 +283,12 @@ export const sendMsg = (payload) => async(dispatch) => {
         })
         .catch((err) => console.log(err));
 };
+export const updateChats = (p_id, payload) => async(dispatch) => {
+    // dispatch(msgSent(payload));
+    dispatch({ type: 'REFRESH_CHATS', payload: { payload, p_id } });
+};
 
-export const updateChats = (id) => async(dispatch) => {};
+// export const updateChats = (id) => async(dispatch) => {};
 
 export const loginUser = async(user) => {
     try {

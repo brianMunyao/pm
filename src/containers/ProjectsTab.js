@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
+import { DragDropContext } from 'react-beautiful-dnd';
 import {
 	IoAdd,
 	IoAddCircleOutline,
@@ -15,13 +15,10 @@ import {
 import { BsBarChartSteps } from 'react-icons/bs';
 import { connect } from 'react-redux';
 import moment from 'moment';
-import axios from 'axios';
-import ioClient from 'socket.io-client';
 import { useHistory, useLocation } from 'react-router';
 import { useCookies } from 'react-cookie';
 
 import ProjectCard from '../components/ProjectCard';
-import TaskItem from '../components/TaskItem';
 import AppGantt from '../components/AppGantt';
 import RadioGroup from '../components/RadioGroup';
 import colors from '../config/colors';
@@ -35,15 +32,13 @@ import {
 	addTask,
 	updateTask,
 	sendMsg,
-	getUserByID,
 } from '../store/actions';
 import empty from '../assets/empty.png';
 import AppToolTip from '../components/AppToolTip';
 import AddMemberModal from '../components/AddMemberModal';
 import UserIcon from '../components/UserIcon';
 import { getColor, getLightColor, getProgress } from '../apis/funcs';
-
-// const socket = ioClient.connect('http://localhost:8000');
+import DnD from '../components/DnD';
 
 const ProjectsTab = ({
 	chats,
@@ -56,9 +51,9 @@ const ProjectsTab = ({
 	openProject,
 	closeProject,
 	deleteProject,
-	addTask,
 	updateTask,
 	sendMsg,
+	socket,
 }) => {
 	const [cookies] = useCookies(['user']);
 
@@ -83,28 +78,14 @@ const ProjectsTab = ({
 
 	const handleMsg = () => {
 		if (msg.trim().length > 0) {
-			sendMsg({
+			setMsg('');
+			socket.emit('chats', {
 				text: msg,
 				date: moment().toLocaleString(),
 				fullname: cookies.user.fullname,
 				user_id: cookies.user._id,
 				project_id: openedProject,
 			});
-			setMsg('');
-			// axios
-			// 	.post('http://localhost:8000/api/chats', {
-			// 		text: msg,
-			// 		date: moment().toLocaleString(),
-			// 		name: 'me',
-			// 	})
-			// 	.then((res) => {
-			// 		sendMsg({
-			// 			text: msg,
-			// 			date: moment().toLocaleString(),
-			// 			name: 'me',
-			// 		});
-			// 	}).then
-			// 	.catch((e) => setMsg(e));
 		}
 		updateScroll();
 	};
@@ -118,12 +99,12 @@ const ProjectsTab = ({
 	const handleOpenProject = (id) => openProject(id);
 	const handleCloseProject = () => closeProject();
 
-	const updateScroll = useCallback(async () => {
+	const updateScroll = useCallback(() => {
 		if (openedProject) {
-			const elem = await document.querySelector('.pt-chats');
+			const elem = document.querySelector('.pt-chats');
 			elem.scrollTop = elem.scrollHeight;
 		}
-	}, [chats, openedProject]);
+	}, [openedProject]);
 
 	const groupProjects = useCallback(
 		(arr) => {
@@ -150,16 +131,6 @@ const ProjectsTab = ({
 	);
 
 	useEffect(() => {
-		// socket.on('chat', (res) => {
-		// 	console.log(10);
-		// 	// handleMsg
-		// 	// return sendMsg({
-		// 	// 	text: res.chat,
-		// 	// 	date: moment().toLocaleString(),
-		// 	// 	name: 'server',
-		// 	// });
-		// });
-
 		const ptasks = tasks.filter((t) => t.project_id === openedProject);
 		setBacklog(ptasks.filter((t) => t.status === 0));
 		setInprogress(ptasks.filter((t) => t.status === 1));
@@ -185,78 +156,35 @@ const ProjectsTab = ({
 		projects,
 	]);
 
-	const DnD = ({ list, id, lStyle }) => (
-		<Droppable droppableId={id}>
-			{(provided, sn) => (
-				<div {...provided.droppableProps} ref={provided.innerRef}>
-					{list.length > 0 ? (
-						list.map((t, i) => (
-							<Draggable
-								key={t._id}
-								index={i}
-								draggableId={t._id.toString()}>
-								{(p, s) => (
-									<div
-										ref={p.innerRef}
-										{...p.draggableProps}
-										{...p.dragHandleProps}>
-										{/* {listStyle === 'list' ? (
-										<TaskItemList data={t} />
-									) : (
-										<TaskItem data={t} />
-									)} */}
-										<TaskItem data={t} listStyle={lStyle} />
-									</div>
-								)}
-							</Draggable>
-						))
-					) : (
-						<TaskItem empty />
-					)}
-
-					{provided.placeholder}
-
-					<div
-						className="pt-add fja"
-						onClick={() => {
-							addTask({
-								title: 'new task',
-								status: Number(id),
-								project_id: openedProject,
-								start_date: moment().toLocaleString(),
-								due_date: moment()
-									.add(7, 'days')
-									.toLocaleString(),
-								created_by: cookies.user._id,
-							});
-						}}>
-						<IoAddCircleOutline /> Add
-					</div>
-				</div>
-			)}
-		</Droppable>
-	);
-
 	const SideChat = () => (
 		<div className="pt-side-chat">
 			<p className="pt-chat-title">Group Chat</p>
 			<div className="pt-chats">
-				{chats.length > 0 ? (
-					chats.map((c, i) => (
-						<Chat me={c.user_id === cookies.user._id} key={i}>
-							<div className="pt-chat-inner">
-								{c.user_id !== cookies.user._id && (
-									<span className="pt-chat-name">
-										{c.fullname}
+				{Boolean(chats[openedProject]) ? (
+					chats[openedProject].length > 0 ? (
+						chats[openedProject].map((c, i) => (
+							<Chat me={c.user_id === cookies.user._id} key={i}>
+								<div className="pt-chat-inner">
+									{c.user_id !== cookies.user._id && (
+										<span className="pt-chat-name">
+											{c.fullname}
+										</span>
+									)}
+									<span className="pt-chat-text">
+										{c.text}
 									</span>
-								)}
-								<span className="pt-chat-text">{c.text}</span>
-								<span className="pt-chat-date">
-									{moment(c.date).format('HH:MM')}
-								</span>
-							</div>
-						</Chat>
-					))
+									<span className="pt-chat-date">
+										{moment(c.date).format('HH:MM')}
+									</span>
+								</div>
+							</Chat>
+						))
+					) : (
+						<div className="chat-empty fja">
+							<IoChatbubbleEllipses />
+							<span>No chats</span>
+						</div>
+					)
 				) : (
 					<div className="chat-empty fja">
 						<IoChatbubbleEllipses />
@@ -282,107 +210,16 @@ const ProjectsTab = ({
 		</div>
 	);
 
-	const move = (
-		source,
-		destination,
-		droppableSource,
-		droppableDestination
-	) => {
-		const sourceClone = Array.from(source);
-		const destClone = Array.from(destination);
-		const [removed] = sourceClone.splice(droppableSource.index, 1);
-
-		destClone.splice(droppableDestination.index, 0, removed);
-
-		const result = {};
-		result[droppableSource.droppableId] = sourceClone;
-		result[droppableDestination.droppableId] = destClone;
-
-		return result;
-	};
-
-	const reorder = (list, startIndex, endIndex) => {
-		const result = Array.from(list);
-		const [removed] = result.splice(startIndex, 1);
-		result.splice(endIndex, 0, removed);
-
-		return result;
-	};
-
 	const onDragEnd = (result) => {
 		const { draggableId, source, destination } = result;
 
 		// dropped outside the list
 		if (!destination) return;
 
-		if (source.droppableId === destination.droppableId) {
-			let myList;
-			if (source.droppableId === '0') {
-				myList = backlog;
-			} else if (source.droppableId === '1') {
-				myList = inprogress;
-			} else {
-				myList = completed;
-			}
-
-			const items = reorder(myList, source.index, destination.index);
-
-			if (source.droppableId === '0') {
-				setBacklog(items);
-			} else if (source.droppableId === '1') {
-				setInprogress(items);
-			} else {
-				setCompleted(items);
-			}
-		} else {
+		if (source.droppableId !== destination.droppableId) {
 			updateTask(draggableId, {
 				status: Number(destination.droppableId),
 			});
-
-			// let backlogFlag = null,
-			// 	inprogressFlag = null,
-			// 	completedFlag = null;
-			// let toList, fromList;
-
-			// if (source.droppableId === '0') {
-			// 	fromList = backlog;
-			// 	backlogFlag = 'src';
-			// } else if (source.droppableId === '1') {
-			// 	fromList = inprogress;
-			// 	inprogressFlag = 'src';
-			// } else {
-			// 	fromList = completed;
-			// 	completedFlag = 'src';
-			// }
-
-			// if (destination.droppableId === '0') {
-			// 	toList = backlog;
-			// 	backlogFlag = 'dest';
-			// } else if (destination.droppableId === '1') {
-			// 	toList = inprogress;
-			// 	inprogressFlag = 'dest';
-			// } else {
-			// 	toList = completed;
-			// 	completedFlag = 'dest';
-			// }
-
-			// const res = move(fromList, toList, source, destination);
-
-			// if (backlogFlag === 'src') {
-			// 	setBacklog(res[source.droppableId]);
-			// } else if (backlogFlag === 'dest') {
-			// 	setBacklog(res[destination.droppableId]);
-			// }
-			// if (inprogressFlag === 'src') {
-			// 	setInprogress(res[source.droppableId]);
-			// } else if (inprogressFlag === 'dest') {
-			// 	setInprogress(res[destination.droppableId]);
-			// }
-			// if (completedFlag === 'src') {
-			// 	setCompleted(res[source.droppableId]);
-			// } else if (completedFlag === 'dest') {
-			// 	setCompleted(res[destination.droppableId]);
-			// }
 		}
 	};
 
@@ -877,11 +714,18 @@ const Chat = styled.div`
 	}
 `;
 
-const mapStateToProps = ({ openedProject, projects, tasks, chats }) => ({
+const mapStateToProps = ({
+	openedProject,
+	projects,
+	tasks,
+	chats,
+	socket,
+}) => ({
 	chats,
 	openedProject,
 	projects,
 	tasks,
+	socket,
 });
 
 export default connect(mapStateToProps, {

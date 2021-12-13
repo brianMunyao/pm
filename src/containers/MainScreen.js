@@ -22,6 +22,7 @@ import {
 	fetchData,
 	openPModal,
 	resetStore,
+	updateChats,
 } from '../store/actions';
 import ProjectModal from '../components/ProjectModal';
 import InboxTab from './InboxTab';
@@ -30,6 +31,7 @@ import DashTab from './DashTab';
 import { isLoggedIn } from '../apis/users';
 import SettingsTab from './SettingsTab';
 import Loader from '../components/Loader';
+import NavItem from '../components/NavItem';
 
 const navs = [
 	{ title: 'Dashboard', Icon: IoGridOutline, to: '/m' },
@@ -49,6 +51,8 @@ const MainScreen = ({
 	closeProject,
 	openPModal,
 	resetStore,
+	socket,
+	updateChats,
 }) => {
 	const [activeNav, setActiveNav] = useState(0);
 	const [cookies, removeCookie] = useCookies(['user']);
@@ -58,55 +62,6 @@ const MainScreen = ({
 			setActiveNav(id);
 			if (openedProject) closeProject();
 		}
-	};
-
-	const NavItem = ({ id, data: { title, Icon, to }, onClick, _class }) => {
-		if (_class) {
-			const c = `nav-item ${_class}`;
-			return (
-				<div>
-					{navMini ? (
-						<AppToolTip title={title}>
-							<div className={c} onClick={onClick}>
-								<Icon />
-								<span>{title}</span>
-							</div>
-						</AppToolTip>
-					) : (
-						<div className={c} onClick={onClick}>
-							<Icon />
-							<span>{title}</span>
-						</div>
-					)}
-				</div>
-			);
-		}
-
-		return (
-			<Link to={to}>
-				{navMini ? (
-					<AppToolTip title={title}>
-						<div
-							className={`nav-item ${
-								id === activeNav ? 'nav-active' : 'nav-inactive'
-							}`}
-							onClick={() => switchTabs(id)}>
-							<Icon />
-							<span>{title}</span>
-						</div>
-					</AppToolTip>
-				) : (
-					<div
-						className={`nav-item ${
-							id === activeNav ? 'nav-active' : 'nav-inactive'
-						}`}
-						onClick={() => switchTabs(id)}>
-						<Icon />
-						<span>{title}</span>
-					</div>
-				)}
-			</Link>
-		);
 	};
 
 	const getWidth = useCallback(() => {
@@ -128,8 +83,27 @@ const MainScreen = ({
 			setActiveNav(navs.findIndex(({ to }) => to === location.pathname));
 			window.addEventListener('resize', getWidth);
 			if (!appLoaded) fetchData(cookies.user._id);
+
+			if (socket) {
+				socket.on('newchats', (res) => {
+					console.log('newchats');
+					if (res.data) {
+						updateChats(res.p_id, res.data);
+					} else {
+						console.log(res.error);
+					}
+				});
+			}
 		}
-	}, [location, getWidth, appLoaded, fetchData]);
+	}, [
+		location,
+		getWidth,
+		appLoaded,
+		fetchData,
+		cookies,
+		socket,
+		updateChats,
+	]);
 
 	if (!isLoggedIn(cookies)) return <Redirect to="/login" />;
 
@@ -148,7 +122,13 @@ const MainScreen = ({
 					/>
 
 					{navs.map((n, i) => (
-						<NavItem id={i} data={n} key={i} />
+						<NavItem
+							id={i}
+							data={n}
+							key={i}
+							activeNav={activeNav}
+							switchTabs={switchTabs}
+						/>
 					))}
 				</div>
 
@@ -274,11 +254,18 @@ const Main = styled.div`
 	}
 `;
 
-const mapStateToProps = ({ navMini, navLock, openedProject, appLoaded }) => ({
+const mapStateToProps = ({
+	navMini,
+	navLock,
+	openedProject,
+	socket,
+	appLoaded,
+}) => ({
 	navMini,
 	navLock,
 	openedProject,
 	appLoaded,
+	socket,
 });
 
 export default connect(mapStateToProps, {
@@ -288,4 +275,5 @@ export default connect(mapStateToProps, {
 	fetchData,
 	openPModal,
 	resetStore,
+	updateChats,
 })(MainScreen);
