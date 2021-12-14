@@ -304,3 +304,11 @@ export const signUpUser = async(user) => {
 
     return data;
 };
+export const updateUser = async(id, user) => {
+    try {
+        const { data } = await axios.put(proxy(`/users/update/${id}`), user);
+        return data;
+    } catch (err) {
+        return { error: 'Error updating information' };
+    }
+};

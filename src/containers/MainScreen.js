@@ -5,6 +5,7 @@ import {
 	IoChatbubbleEllipsesOutline,
 	IoFileTrayFullOutline,
 	IoGridOutline,
+	IoPersonOutline,
 	IoPower,
 	IoSettingsOutline,
 } from 'react-icons/io5';
@@ -26,7 +27,6 @@ import {
 } from '../store/actions';
 import ProjectModal from '../components/ProjectModal';
 import InboxTab from './InboxTab';
-import AppToolTip from '../components/AppToolTip';
 import DashTab from './DashTab';
 import { isLoggedIn } from '../apis/users';
 import SettingsTab from './SettingsTab';
@@ -37,7 +37,7 @@ const navs = [
 	{ title: 'Dashboard', Icon: IoGridOutline, to: '/m' },
 	{ title: 'Projects', Icon: IoFileTrayFullOutline, to: '/m/projects' },
 	{ title: 'Inbox', Icon: IoChatbubbleEllipsesOutline, to: '/m/inbox' },
-	{ title: 'Settings', Icon: IoSettingsOutline, to: '/m/settings' },
+	{ title: 'Profile', Icon: IoPersonOutline, to: '/m/profile' },
 ];
 
 const MainScreen = ({
@@ -150,7 +150,7 @@ const MainScreen = ({
 					/>
 					<Route path="/m/inbox" component={() => <InboxTab />} />
 					<Route
-						path="/m/settings"
+						path="/m/profile"
 						component={() => <SettingsTab />}
 					/>
 				</Switch>

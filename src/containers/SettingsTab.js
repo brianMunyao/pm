@@ -9,6 +9,7 @@ import { Link, Route, Switch } from 'react-router-dom';
 import UserIcon from '../components/UserIcon';
 import FormItem from '../components/FormItem';
 import colors from '../config/colors';
+import { updateUser } from '../store/actions';
 
 const SettingsTab = () => {
 	const [formError, setFormError] = useState('');
@@ -16,6 +17,11 @@ const SettingsTab = () => {
 	const [changed, setChanged] = useState(false);
 	const [selTab, setSelTab] = useState(0);
 	const [cookies, setCookie] = useCookies(['user']);
+
+	const [fName, setFName] = useState(cookies.user.fullname);
+	const [pass, setPass] = useState('');
+
+	// const [user, setUser] = useState({ fullname: cookies.user.fullname });
 
 	const formik = useFormik({
 		initialValues: {
@@ -65,19 +71,96 @@ const SettingsTab = () => {
 		},
 	});
 
+	const handleSubmit = async () => {
+		setSubmitting(true);
+		setFormError('');
+		try {
+			const obj = {};
+			if (fName !== cookies.user.fullname) {
+				obj['fullname'] = fName;
+			}
+			if (pass.length >= 8) {
+				obj['password'] = pass;
+			}
+
+			const res = await updateUser(cookies.user._id, obj);
+			if (res.data) {
+				setCookie('user', res.data);
+			} else {
+				setFormError(res.error);
+			}
+			setSubmitting(false);
+			// setCookie('user', { ...cookies.user, ...obj }); //!CHANGE THIS
+		} catch (e) {
+			setFormError('Submittion error.');
+			setSubmitting(false);
+		}
+	};
+
 	useEffect(() => {
-		const { fullname, password } = formik.values;
-		const { fullname: fName } = cookies.user;
-		if (fullname !== fName || password.length > 0) {
+		// const { fullname, password } = formik.values;
+		if (cookies.user.fullname !== fName || pass.length > 0) {
 			setChanged(true);
 		} else {
 			setChanged(false);
 		}
-	}, [formik.values, cookies.user]);
+	}, [cookies.user, fName, pass.length]);
 
 	return (
 		<Container>
-			<div className="st-sidebar">
+			<div className="st-main">
+				<div className="st-profile">
+					<UserIcon name={cookies.user.fullname} size={140} rounded />
+
+					<p className="error">{formError}</p>
+
+					<FormItem
+						id="fullname"
+						Icon={IoPerson}
+						inputType="text"
+						label="Fullname"
+						value={fName}
+						onChange={(v) => setFName(v.target.value)}
+						// error={formik.errors.fullname}
+						// onChange={formik.handleChange}
+						// onBlur={formik.handleBlur}
+					/>
+					<FormItem
+						disabled
+						id="email"
+						Icon={IoPerson}
+						inputType="text"
+						label="Email Address"
+						value={cookies.user.email}
+						// error={formik.errors.email}
+						// onChange={formik.handleChange}
+						// onBlur={formik.handleBlur}
+					/>
+					<FormItem
+						id="password"
+						Icon={IoLockClosed}
+						inputType="password"
+						label="Password"
+						placeholder="Enter New Password"
+						value={pass}
+						onChange={(v) => setPass(v.target.value)}
+						// value={formik.values.password}
+						// error={formik.errors.password}
+						// onChange={formik.handleChange}
+						// onBlur={formik.handleBlur}
+					/>
+
+					<FormItem
+						width="200px"
+						submitting={submitting}
+						disabled={!changed}
+						inputType="submit"
+						label="Save Changes"
+						onClick={handleSubmit}
+					/>
+				</div>
+			</div>
+			{/* <div className="st-sidebar">
 				{[{ to: '/m/settings', title: 'Edit profile' }].map((v, i) => (
 					<Link to={v.to}>
 						<SelTab active={selTab === i} key={i}>
@@ -92,59 +175,74 @@ const SettingsTab = () => {
 					<Route
 						path="/m/settings"
 						component={() => (
-							<form onSubmit={formik.handleSubmit}>
-								<div className="st-profile">
-									<UserIcon
-										name={cookies.user.fullname}
-										size={140}
-										rounded
-									/>
-									<FormItem
-										id="fullname"
-										Icon={IoPerson}
-										inputType="text"
-										label="Fullname"
-										value={formik.values.fullname}
-										error={formik.errors.fullname}
-										onChange={formik.handleChange}
-										onBlur={formik.handleBlur}
-									/>
-									<FormItem
-										disabled
-										id="email"
-										Icon={IoPerson}
-										inputType="text"
-										label="Email Address"
-										value={formik.values.email}
-										error={formik.errors.email}
-										onChange={formik.handleChange}
-										onBlur={formik.handleBlur}
-									/>
-									<FormItem
-										id="password"
-										Icon={IoLockClosed}
-										inputType="password"
-										label="Password"
-										placeholder="Enter New Password"
-										value={formik.values.password}
-										error={formik.errors.password}
-										onChange={formik.handleChange}
-										onBlur={formik.handleBlur}
-									/>
+							<>
+								<form onSubmit={formik.handleSubmit}>
+									<div className="st-profile">
+										<UserIcon
+											name={cookies.user.fullname}
+											size={140}
+											rounded
+										/>
 
-									<FormItem
-										width="200px"
-										submitting={submitting}
-										disabled={!changed}
-										inputType="submit"
-										label="Save Changes"
-									/>
-								</div>
-							</form>
+										<FormItem
+											id="fullname"
+											Icon={IoPerson}
+											inputType="text"
+											label="Fullname"
+											value={formik.values.fullname}
+											error={formik.errors.fullname}
+											onChange={formik.handleChange}
+											onBlur={formik.handleBlur}
+										/>
+										<FormItem
+											disabled
+											id="email"
+											Icon={IoPerson}
+											inputType="text"
+											label="Email Address"
+											value={formik.values.email}
+											error={formik.errors.email}
+											onChange={formik.handleChange}
+											onBlur={formik.handleBlur}
+										/>
+										<FormItem
+											id="password"
+											Icon={IoLockClosed}
+											inputType="password"
+											label="Password"
+											placeholder="Enter New Password"
+											value={formik.values.password}
+											error={formik.errors.password}
+											onChange={formik.handleChange}
+											onBlur={formik.handleBlur}
+										/>
+
+										<FormItem
+											width="200px"
+											submitting={submitting}
+											disabled={!changed}
+											inputType="submit"
+											label="Save Changes"
+										/>
+									</div>
+								</form>
+
+								<FormItem
+									id="password"
+									Icon={IoLockClosed}
+									inputType="password"
+									label="Password"
+									placeholder="Enter New Password"
+									// value={formik.values.password}
+									// error={formik.errors.password}
+									// onChange={formik.handleChange}
+									// onBlur={formik.handleBlur}
+								/>
+							</>
 						)}
 					/>
 				</Switch>
-			</div>
+			</div> */}
 		</Container>
 	);
 };
@@ -154,6 +252,9 @@ const Container = styled.div`
 	display: flex;
 	flex-flow: row;
 	height: 100%;
+	.error {
+		color: ${colors.error};
+	}
 
 	.st-sidebar,
 	.st-main {
@@ -171,6 +272,8 @@ const Container = styled.div`
 		overflow-y: auto;
 
 		.st-profile {
+			max-width: 600px;
+			margin: 0 auto;
 			padding: 30px;
 			display: flex;
 			flex-direction: column;
