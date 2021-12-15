@@ -52,6 +52,7 @@ const InboxTab = ({ projects, chats, socket }) => {
 
 					{projects.map((p, i) => (
 						<InboxTitle
+							active={p._id === projectID}
 							color={p.color}
 							key={i}
 							onClick={() => {
@@ -157,7 +158,7 @@ const Container = styled.div`
 
 	.it-sidebar {
 		left: 0;
-		width: 200px;
+		width: 180px;
 		background: white;
 		.it-title {
 			font-size: 12px;
@@ -169,7 +170,7 @@ const Container = styled.div`
 		}
 	}
 	.it-main {
-		left: 200px;
+		left: 180px;
 		right: 0;
 		padding: 15px 0 0;
 		display: flex;
@@ -191,8 +192,9 @@ const Container = styled.div`
 
 		.it-chats-title {
 			padding: 0 10px 10px;
-			font-size: 12px;
+			/* font-size: 12px; */
 			font-weight: 600;
+			box-shadow: 0 10px 5px #e6e6e6;
 		}
 
 		.it-chats {
@@ -200,6 +202,10 @@ const Container = styled.div`
 			flex-direction: column;
 			flex: 1;
 			overflow: auto;
+			padding: 10px 50px;
+			@media (max-width: 880px) {
+				padding: 10px;
+			}
 		}
 		.it-chats-input {
 			background: white;
@@ -251,8 +257,11 @@ const InboxTitle = styled.div`
 	user-select: none;
 	cursor: pointer;
 	transition: all 0.2s linear;
+	background: ${({ active, color }) => (active ? getColor(color) : 'white')};
+	color: ${({ active }) => (active ? 'white' : 'inherit')};
 	&:hover {
 		background: ${({ color }) => getLightColor(color)};
+		color: inherit;
 	}
 	.it-group-chats {
 		width: 22px;

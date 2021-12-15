@@ -322,36 +322,27 @@ const ProjectsTab = ({
 										? 'pt-list-view'
 										: 'pt-kanban-view'
 								}`}>
-								<div className="pt-backlog">
-									<div className="pt-todos-title">
-										Backlog ({backlog.length})
-									</div>
-									<DnD
-										list={backlog}
-										id="0"
-										lStyle={listStyle}
-									/>
-								</div>
-								<div className="pt-inprogress">
-									<div className="pt-todos-title">
-										In Progress ({inprogress.length})
-									</div>
-									<DnD
-										list={inprogress}
-										id="1"
-										lStyle={listStyle}
-									/>
-								</div>
-								<div className="pt-complete">
-									<div className="pt-todos-title">
-										Complete ({completed.length})
-									</div>
-									<DnD
-										list={completed}
-										id="2"
-										lStyle={listStyle}
-									/>
-								</div>
+								<DnD
+									_class="pt-cols pt-backlog"
+									title="Backlog"
+									list={backlog}
+									id="0"
+									lStyle={listStyle}
+								/>
+								<DnD
+									_class="pt-cols pt-inprogress"
+									title="In Progress"
+									list={inprogress}
+									id="1"
+									lStyle={listStyle}
+								/>
+								<DnD
+									_class="pt-cols pt-complete"
+									title="Complete"
+									list={completed}
+									id="2"
+									lStyle={listStyle}
+								/>
 							</div>
 						</DragDropContext>
 					)}
@@ -526,6 +517,21 @@ const Container = styled.div`
 			padding: 10px;
 			overflow-y: auto;
 
+			.pt-cols {
+				padding: 10px;
+				border-radius: 10px;
+				/* overflow-y: auto; */
+			}
+			/* .pt-backlog {
+				background: ${colors.errorLight};
+			}
+			.pt-inprogress {
+				background: ${colors.amberLight};
+			}
+			.pt-complete {
+				background: ${colors.greenLight};
+			} */
+
 			.pt-todos-title {
 				padding: 0 10px 10px;
 				font-weight: 600;
@@ -551,8 +557,8 @@ const Container = styled.div`
 
 		.pt-open.pt-kanban-view {
 			display: grid;
-			grid-template-columns: repeat(3, minmax(200px, 1fr));
-			column-gap: 25px;
+			grid-template-columns: repeat(3, minmax(220px, 1fr));
+			column-gap: 18px;
 			flex: 1;
 		}
 		.pt-open.pt-list-view {
@@ -568,6 +574,9 @@ const Container = styled.div`
 					transform: translateX(2px);
 				}
 			}
+		}
+		.pt-open.pt-list-view .pt-cols {
+			margin-bottom: 10px;
 		}
 
 		.pt-side-chat {
