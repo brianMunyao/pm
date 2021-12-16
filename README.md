@@ -1,5 +1,5 @@
 # Screenshots
-![alt text](https://github.com/brianMunyao/pm/blob/master/screenshots/login.jpg?raw=true)
+![alt text](https://github.com/brianMunyao/pm/blob/master/screenshots/login.png?raw=true)
 ![alt text](https://github.com/brianMunyao/pm/blob/master/login.jpg?raw=true)
 ![alt text](https://github.com/brianMunyao/pm/blob/master/login.jpg?raw=true)
 ![alt text](https://github.com/brianMunyao/pm/blob/master/login.jpg?raw=true)
