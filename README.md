@@ -1,9 +1,9 @@
 # Screenshots
 ![alt text](https://github.com/brianMunyao/pm/blob/master/screenshots/login.png?raw=true)
-![alt text](https://github.com/brianMunyao/pm/blob/master/screenshots/register.jpg?raw=true)
-![alt text](https://github.com/brianMunyao/pm/blob/master/screenshots/home.jpg?raw=true)
-![alt text](https://github.com/brianMunyao/pm/blob/master/screenshots/projects.jpg?raw=true)
-![alt text](https://github.com/brianMunyao/pm/blob/master/screenshots/list.jpg?raw=true)
+![alt text](https://github.com/brianMunyao/pm/blob/master/screenshots/register.png?raw=true)
+![alt text](https://github.com/brianMunyao/pm/blob/master/screenshots/home.png?raw=true)
+![alt text](https://github.com/brianMunyao/pm/blob/master/screenshots/projects.png?raw=true)
+![alt text](https://github.com/brianMunyao/pm/blob/master/screenshots/list.png?raw=true)
 
 # Getting Started with Create React App
 
